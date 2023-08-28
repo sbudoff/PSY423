@@ -109,8 +109,9 @@ plot_histdens(sim10)
 sim10 <- data.frame(Height = rnorm(100000, mean = x_bar, sd = s) ) %>%
   rbind(df$Height)
   
-plot_histdens(sim10)
+sim_hist <- plot_histdens(sim10)
 
+sim_hist
 ```
 
 ## The Central Limit Theorem tell us this shape has a special name: The Normal Distribution
@@ -347,7 +348,7 @@ It makes outlines MORE important!
 
 When we want to think in the same units as our data!
 
-## Let's Practice on teh board
+## Let's Practice on the board
 
 Our dataset:
 
@@ -358,3 +359,26 @@ Our dataset:
 2) Find the Range, Variance, and Standard Deviation
 
 3) Let's Plot this data as a histogram, how would you describe it?
+
+## Standardization
+
+Sometimes we want to compare values that come from different distributions 
+
+To compare apples with apples, we must standardize them
+
+We can do this by **Transforming** each distribution such that both have a mean = 0 and standard deviation = 1
+
+This is called a standard normal, or Z-distribution
+
+## The Z-distribution of our Height Simulation
+
+```{r zplot}
+
+sim_z <- sim10 %>%
+  mutate(Height = (Height - mean(Height)) / sd(Height))
+
+sim_z <- plot_histdens(sim_z)
+
+(sim_hist + ggtitle("Untransformed")) / (sim_z + ggtitle("Z Distribution"))
+
+```
