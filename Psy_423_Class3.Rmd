@@ -1,0 +1,360 @@
+---
+title: "PSY 423 Class 2"
+author: "S. Budoff"
+date: "2023-08-23"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+
+gs4_auth(email = "sabudoff@gmail.com")
+
+#Sort the integer values
+coffee_levels <- c("Love it!", "It's good", "No opinion", "It's bad", "Ewwww!")
+shoe_levels <- c("M 0-4.5 / W 0-6",
+                 "M 5-6 / W 6.5-7.5",
+                 "M 6.5-7.5 / W 8-9",
+                 "M 8-9 / W 9.5-10.5",
+                 "M 9.5-10.5 / W 11-12",
+                 "M 11-12 / W 12.5-13.5",
+                 "M 12.5+ / W14+")
+
+url = "https://docs.google.com/spreadsheets/d/18Vj9uuD51ZHRds2Jqve91Cii_x46lJJl5ErrEwb4tKs/edit#gid=976217741"
+df <- read_sheet(url, sheet = "Form Responses 1")
+df <- df %>%
+  mutate(Shoe_Size = factor(`What size shoe do you wear?`, levels=shoe_levels),
+         HairColor = factor(`What color is your hair right now?`),
+         Height = `How tall are you (in inches)?`,
+         Coffee = factor(`How much do you like coffee?`, levels=coffee_levels)) %>%
+  select(Shoe_Size, HairColor, Height, Coffee)
+```
+
+## Warmup Quiz
+
+![https://forms.gle/Wz8fgeVnnuFpZaHi6](/home/sam/Regis/PSY423/QR_Codes/PSY423_quiz2.png){width=500px}
+
+
+
+
+
+## Exploring our Data
+
+## Histogram
+
+```{r plot1}
+
+plot_histdens <- function(df) {
+  hist <- ggplot(df, aes(x = Height)) +
+  geom_histogram()+
+  theme_minimal() +
+  ggtitle("Histogram of Heights")
+
+dens <- ggplot(df, aes(x = Height)) +
+  geom_density(fill = 'blue', alpha = 0.8) +
+  theme_minimal() +
+  ggtitle("Density of Heights")
+
+hist + dens
+}
+
+plot_histdens(df)
+
+```
+
+## Let's Imagine we sampled 10 times more students
+
+```{r plot2}
+
+x_bar <- mean(df$Height)
+s <- sd(df$Height)
+
+sim10 <- data.frame(Height = rnorm(100, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+
+plot_histdens(sim10)
+
+```
+
+
+## Ok what about with 100 times more students (1000)
+
+```{r plot3}
+sim10 <- data.frame(Height = rnorm(1000, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+plot_histdens(sim10)
+
+```
+
+## 10000 samples?
+
+```{r plot4}
+sim10 <- data.frame(Height = rnorm(10000, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+plot_histdens(sim10)
+
+```
+
+## By 100000 samples we are converging on the Central Limit Theorem based on the laws of large numbers 
+
+```{r plot5}
+sim10 <- data.frame(Height = rnorm(100000, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+plot_histdens(sim10)
+
+```
+
+## The Central Limit Theorem tell us this shape has a special name: The Normal Distribution
+
+```{r plot6}
+# Generate a sequence of x-values
+x <- seq(-5, 5, by = 0.01)
+
+# Calculate the normal PDF values for the x-values
+pdf_values <- dnorm(x, mean = 0, sd = 2)
+
+# Plot the normal PDF
+plot(x, pdf_values, type = "l", lwd = 2, col = "blue", 
+     xlab = "x", ylab = "Probability", main = "Normal Probability Density Function")
+```
+
+## The Central Limit Theorem:
+
+Given Random and Independent Samples of Observations, the **Sample Distribution**'s mean approaches normality as the size of the sample (denoted N) increases
+
+This is true regardless of the shape of the **Population Distribution**
+
+
+## Special features of a Normal Curve:
+1) Bell Shaped
+2) Symmetrical
+3) Unimodal
+4) With sufficiently large samples, we can **assume** most data will converge on a Normal
+
+## Notice the last assumption, not all data is Normal
+
+```{r plot7}
+# Parameters for left-skewed beta distribution
+alpha_left <- 5
+beta_left <- 2
+
+# Parameters for uniform distribution
+alpha_c <- 1
+beta_c <- 1
+
+# Parameters for right-skewed beta distribution
+alpha_right <- 2
+beta_right <- 5
+
+# Generate x-values for plotting
+x_values <- seq(0, 1, by = 0.01)
+
+# Calculate PDF values for left-skewed beta distribution
+pdf_left <- dbeta(x_values, alpha_left, beta_left)
+
+# Calculate PDF values for uniform beta distribution
+pdf_c <- dbeta(x_values, alpha_c, beta_c)
+
+# Calculate PDF values for right-skewed beta distribution
+pdf_right <- dbeta(x_values, alpha_right, beta_right)
+
+pdf_norm <- dnorm(x_values, 0.5, 0.2)
+
+# Create data frame
+data <- data.frame(
+  Distribution = rep(c("Left Skewed", "Uniform", "Right Skewed", "Normal"), each = length(x_values)),
+  x = rep(x_values, times = 4),
+  PDF = c(pdf_left, pdf_c, pdf_right, pdf_norm)
+)
+
+# Create a side-by-side density plot using facet_wrap
+ggplot(data, aes(x = x, y = PDF, group = Distribution, color = Distribution)) +
+  geom_line() +
+  labs(x = "x", y = "PDF", title = "Different Distributions") +
+  theme_minimal() +
+  scale_color_manual(values = c("blue","green",  "red", "purple"))  +
+  facet_wrap(~ Distribution, ncol = 2, scales = "free") 
+```
+
+## Focus on skewness
+
+```{r plot8}
+# Create a side-by-side density plot using facet_wrap
+data %>%
+  filter(Distribution %in% c("Left Skewed", "Right Skewed")) %>%
+  ggplot(aes(x = x, y = PDF, group = Distribution, color = Distribution)) +
+    geom_line() +
+    labs(x = "x", y = "PDF", title = "Different Distributions") +
+    theme_minimal() +
+    facet_wrap(~ Distribution, ncol = 2, scales = "free") +
+    scale_color_manual(values = c("blue",  "red")) 
+```
+
+## Let's Predict The skew
+1) Number of children per household
+2) Income in the US
+3) SAT/ACT Scores
+
+## Let's Predict The Distribution
+1) Height of trees in the forest
+2) Dice rolls with a fair dice
+3) Length of comments on a youtube video
+
+## Measures of Central Tendency
+1) Mean
+2) Median
+3) Mode
+
+## Visualizing Measures of Central Tendency
+
+```{r plot9}
+# Calculate mean and mode
+mean_value <- mean(df$Height)
+median_value <- median(df$Height)
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+mode_value <- getmode(df$Height)
+
+# Create the plot with mean and mode lines
+box <- ggplot(df, aes(y = Height)) +
+  geom_boxplot() +
+  geom_hline(yintercept = median_value, color = "black", linetype = "dashed") +
+  geom_hline(yintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_hline(yintercept = mode_value, color = "blue", linetype = "dashed") +
+  labs(y = "Height", title = "Boxplot with Mean and Mode") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+hist <- ggplot(df, aes(x = Height)) +
+  geom_histogram()+
+  geom_vline(xintercept = median_value, color = "black", linetype = "dashed") +
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = mode_value, color = "blue", linetype = "dashed") +
+  theme_minimal() +
+  ggtitle("Histogram of Heights")
+hist + box
+```
+
+## Modality
+
+"The" mode can be a set of values!
+
+```{r plot10}
+# Number of data points
+n <- 1000
+
+# Generate data for unimodal distribution
+unimodal_data <- rnorm(n+1, mean = 0, sd = 1)
+
+# Generate data for bimodal distribution
+bimodal_data <- c(rnorm(n / 2, mean = -2, sd = 0.5), rnorm(n / 2, mean = 2, sd = 0.5))
+
+# Generate data for trimodal distribution
+trimodal_data <- c(rnorm(n / 3, mean = -3, sd = 0.5),
+                   rnorm(n / 3, mean = 0, sd = 0.5),
+                   rnorm(n / 3, mean = 3, sd = 0.5))
+
+# Create data frame for plotting
+df <- data.frame(
+  Distribution = rep(c("1 Peak = Unimodal", "2 Peaks =Bimodal", "3+ Peaks = Trimodal or Multimodal"), each = n),
+  Values = c(unimodal_data, bimodal_data, trimodal_data)
+)
+
+# Create a set of density plots using facet_wrap
+ggplot(df, aes(x = Values, fill = Distribution)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Values", y = "Density", title = "Distributions: Unimodal, Bimodal, Trimodal") +
+  theme_minimal() +
+  theme(legend.position = 'None') +
+  facet_wrap(~ Distribution, ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = c("blue", "green", "purple")) +
+  guides(fill = guide_legend(title = "Distribution"))
+```
+
+
+## Think on it
+
+
+1. In a normally distributed dataset, which is the greatest (highest) value: mean, median, or mode?
+2. Do all data have a mean, median, and mode?
+
+3. For any dataset, which measures of central tendency must have only 1 value?
+
+4. When is the mode the best measure of central tendency?
+
+5. What if you need to report the mode, but no number in your distribution occurs twice (e.g., all
+numbers are reported to 2 decimals).
+
+
+## Variablity
+
+How spread out our data is
+
+```{r plot11}
+# Number of data points
+n <- 1000
+
+# Generate data for unimodal distribution
+tight_data <- rnorm(n, mean = 0, sd = 0.5)
+
+# Generate data for bimodal distribution
+spread_data <- rnorm(n, mean = 0, sd = 1)
+
+# Generate data for trimodal distribution
+very_data <- rnorm(n, mean = 0, sd = 2)
+
+# Create data frame for plotting
+df <- data.frame(
+  Distribution = rep(c("SD = 0.5", "SD = 1.0", "SD = 2.0"), each = n),
+  Values = c(tight_data, spread_data, very_data)
+)
+
+# Create a set of density plots using facet_wrap
+ggplot(df, aes(x = Values, fill = Distribution)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Values", y = "Density", title = "Distributions With Different Variance") +
+  theme_minimal() +
+  scale_fill_manual(values = c("blue", "green", "purple")) +
+  guides(fill = guide_legend(title = "Distribution"))
+```
+
+## Measures of Variability
+
+1) Range = Maximum - Minimum
+
+2) Standard Deviation = How far apart numbers are (their difference from the mean) in a dataset
+
+3) Variance = The average difference each value has from the mean **squared**
+
+## Why is Variance Squared
+
+It makes outlines MORE important!
+
+
+## When do we use Standard Deviation?
+
+When we want to think in the same units as our data!
+
+## Let's Practice on teh board
+
+Our dataset:
+
+{7,7, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 12, 15, 20}
+
+1) Find the Mean, Median, and Mode
+
+2) Find the Range, Variance, and Standard Deviation
+
+3) Let's Plot this data as a histogram, how would you describe it?
