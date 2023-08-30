@@ -12,6 +12,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
 library(tidyverse)
 library(googlesheets4)
 library(patchwork)
+library(qrcode)
 
 gs4_auth(email = "sabudoff@gmail.com")
 
@@ -37,7 +38,11 @@ df <- df %>%
 
 ## Warmup Quiz
 
-![https://forms.gle/QSWNXy5qgWFGBT1E9](/home/sam/Regis/PSY423/QR_Codes/PSY423_quiz4.png){width=500px}
+```{r qr}
+code_link <- "https://forms.gle/QSWNXy5qgWFGBT1E9"
+plot(qr_code(code_link))
+print(code_link)
+```
 
 
 ## Variablity
