@@ -146,3 +146,73 @@ sim_z <- plot_histdens(sim_z)
 
 ```
 
+## What's the point?
+
+By **Standardizing** Normal distributions we can compare them directly
+
+For example if you want to know how students in a physics class did compared to student's in a french class on the respective midterm exams, you want to look at the Z-distributions!
+
+## Standardizing also lets us compare individuals
+
+Suppose you scored a 94 on your physics test and an 80 on your french test, on which test did you do better?
+
+## Raw data
+
+```{r zplot1}
+test_dists <- data.frame(Physics = rnorm(29, mean = 95, sd = 1),
+                         French = rnorm(29, mean = 70, sd = 3)) %>%
+  rbind(data.frame(Physics = 94, French = 80)) %>%
+  mutate(Physics.Z = (Physics-mean(Physics))/sd(Physics),
+         French.Z = (French-mean(French))/sd(French))
+
+test_dists %>%
+  select(-Physics.Z, -French.Z) %>%
+  gather("Test", "Raw Score") %>%
+  ggplot(aes(x = `Raw Score`, fill = Test)) +
+  geom_histogram() +
+  facet_wrap(~Test) +
+  theme_minimal()
+
+```
+
+
+## Data Distributions
+
+```{r zplot2}
+test_dists <- data.frame(Physics = rnorm(29, mean = 95, sd = 1),
+                         French = rnorm(29, mean = 70, sd = 3)) %>%
+  rbind(data.frame(Physics = 94, French = 80)) %>%
+  mutate(Physics.Z = (Physics-mean(Physics))/sd(Physics),
+         French.Z = (French-mean(French))/sd(French))
+
+test_dists %>%
+  select(-Physics.Z, -French.Z) %>%
+  gather("Test", "Raw Score") %>%
+  ggplot(aes(x = `Raw Score`)) +
+  geom_density(aes(fill = Test), adjust = 1.5) +  # Add density plots with different colors
+  facet_wrap(~Test) +
+  theme_minimal()
+
+```
+
+
+## Z-Distributions
+
+```{r zplot3}
+test_dists <- data.frame(Physics = rnorm(29, mean = 95, sd = 1),
+                         French = rnorm(29, mean = 70, sd = 3)) %>%
+  rbind(data.frame(Physics = 94, French = 80)) %>%
+  mutate(Physics.Z = (Physics-mean(Physics))/sd(Physics),
+         French.Z = (French-mean(French))/sd(French))
+
+test_dists %>%
+  select(-Physics, -French) %>%
+  gather("Test", "Z Score") %>%
+  ggplot(aes(x = `Z Score`)) +
+  geom_density(aes(fill = Test), adjust = 1.5) +  # Add density plots with different colors
+  facet_wrap(~Test) +
+  theme_minimal()
+
+```
+
+`r test_dists[30,]`
