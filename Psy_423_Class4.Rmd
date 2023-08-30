@@ -199,11 +199,12 @@ test_dists %>%
 ## Z-Distributions
 
 ```{r zplot3}
-test_dists <- data.frame(Physics = rnorm(29, mean = 95, sd = 1),
-                         French = rnorm(29, mean = 70, sd = 3)) %>%
-  rbind(data.frame(Physics = 94, French = 80)) %>%
-  mutate(Physics.Z = (Physics-mean(Physics))/sd(Physics),
-         French.Z = (French-mean(French))/sd(French))
+test_dists <- data.frame(French = rnorm(29, mean = 70, sd = 3),
+                         Physics = rnorm(29, mean = 95, sd = 1)
+                         ) %>%
+  rbind(data.frame(French = 80, Physics = 94)) %>%
+  mutate(French.Z = (French-mean(French))/sd(French),
+         Physics.Z = (Physics-mean(Physics))/sd(Physics))
 
 test_dists %>%
   select(-Physics, -French) %>%
@@ -213,6 +214,116 @@ test_dists %>%
   facet_wrap(~Test) +
   theme_minimal()
 
+print(test_dists[30,])
 ```
 
-`r test_dists[30,]`
+## Z-Score Calculation
+
+You must first use your raw data to calculate your sample mean ($\bar{x}$), and sample standard deviation ($s$), then you can use these values to standardize your value of interest ($x$).
+
+Then: $$z = \frac{x - \bar{x}{s} $$
+
+If we are dealing with a full population, the logic is the same but the symbols we will use are now $\mu$ and $\sigma$ for the population mean and standard deviation respectively, so the formula looks like: $$z = \frac{x - \mu}{\sigma}$$
+
+## The Standard Normal let's you guestimate very easily!
+![](/home/sam/Regis/PSY423/QR_Codes/normal_curve.png){width=750px}
+
+## Practice Questions:
+![](/home/sam/Regis/PSY423/QR_Codes/normal_curve.png){width=400px}
+
+What percent of scores lie below z=1?
+
+What percent lie above?
+
+What percent of scores lie above and below the third standard deviation?
+
+What percent of scores lie above and below the second standard deviation?
+
+## Hypothesis Testing
+
+Is there a reliable difference between a set of scores?
+
+Think about some examples in your groups?
+
+## Hypothesis Testing
+
+A hypothesis is a guess, but in frequentist statistics we have a special way of framing it
+
+Specifically we must remember we CAN NOT prove anything, we can only disprove something
+
+Thus we must frame our hypothesis accordingly
+
+With your examples try this for yourself
+
+## Statistical Signifigance
+
+This is our decision point where we decide if we reject our null hypothesis or not
+
+Basically it asks if two values/distributions are "different enough"
+
+Said differently, how confident are we in our decision?
+
+## p-values
+
+The formal name for what we compute is the p-value, it is the probability your samples came from the same distribution and **differences occurred by chance**
+
+This is also the risk that you will make a **Type I Error**, that is you incorrectly reject a true null hypothesis
+
+If you are hoping to reject a null hypothesis do you want this value to be high or low?
+
+## Example
+
+Suppose we have two vaccines that are being developed
+
+Vaccine A protected 1000 volunteers, but failed to protect 3 (99.7% protected)
+
+Vaccine B protected 4 volunteers, but failed to protect 1200 (0.33% protected)
+
+What is your null hypothesis?
+
+Roughly speaking do you expect the p-value that these vaccines are equally effective to be high or low
+
+What can you conclude about the null hypothesis?
+
+Which vaccine do you want?
+
+
+## Example
+
+Suppose we have two vaccines that are being developed
+
+Vaccine A protected 700 volunteers, but failed to protect 224 (76% protected)
+
+Vaccine B protected 800 volunteers, but failed to protect 296 (73% protected)
+
+With more ambiguity, can you still guesstimate a p-value?
+
+You still need to decide which vaccine you want...
+
+
+
+## $\alpha = 0.05$
+
+This is the typical threshold for a significant p-value 
+
+![](/home/sam/Regis/PSY423/QR_Codes/normal_curve.png){width=750px}
+
+## $\alpha = 0.05$
+
+![](/home/sam/Regis/PSY423/QR_Codes/p-value.png){width=700px}
+
+
+## Practice
+
+What is a p-value in your own words?
+
+Sally has an IQ = 140, which is a z-score of 2.67, is Sally statistically significantly different than the population?
+
+True or False: All normal distributions are symmetrical
+
+True or False: All normal distributions have a mean = 1
+
+True or False: All normal distributions have a standard deviation = 1
+
+True or False: All normal distributions have a total area (probability) under the curve = 1
+
