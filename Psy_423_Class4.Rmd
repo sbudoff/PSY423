@@ -320,7 +320,6 @@ y <- dnorm(x)
 sigmas <- seq(-5,5)
 cum_prob <- c()
 for (i in 2:length(sigmas)) {
-  print(sigmas[i])
   cum_prob <- c(cum_prob, diff(pnorm(c(sigmas[i-1],sigmas[i]))))
 }
 
