@@ -311,11 +311,49 @@ You still need to decide which vaccine you want...
 
 This is the typical threshold for a significant p-value 
 
-![](/home/sam/Regis/PSY423/QR_Codes/normal_curve.png){width=750px}
+```{r curve}
+
+# Generate data points for the normal distribution
+x <- seq(-10, 10, length.out = 1000)
+y <- dnorm(x)
+
+sigmas <- seq(-5,5)
+cum_prob <- c()
+for (i in 2:length(sigmas)) {
+  print(sigmas[i])
+  cum_prob <- c(cum_prob, diff(pnorm(c(sigmas[i-1],sigmas[i]))))
+}
+
+sigmas = c(seq(-5,-1), seq(1,5))
+sigmas_df <- data.frame("sigma" = sigmas, "Prob" = cum_prob, "y" = c(0.5,0.6, 0.7, 0.8, 0.9, 1.0, 0.8, 0.7, 0.6, 0.5)) %>%
+  mutate(Prob = sprintf("σ = %.0f => %.1e",sigmas, Prob))
+
+# Create a data frame for plotting
+data <- data.frame(x = x, y = y)
+
+rainbow_norm <- ggplot(data, aes(x = x, y = y)) +
+  geom_line() +
+  geom_ribbon(data = data[data$x < 1, ], aes(x = x, ymin = 0, ymax = y), fill = "red", alpha = 1) +
+  geom_ribbon(data = data[data$x < -1, ], aes(x = x, ymin = 0, ymax = y), fill = "orange", alpha = 1) +
+  geom_ribbon(data = data[data$x < -2, ], aes(x = x, ymin = 0, ymax = y), fill = "yellow", alpha = 1) +
+  geom_ribbon(data = data[data$x < -3, ], aes(x = x, ymin = 0, ymax = y), fill = "green", alpha = 1) +
+  geom_ribbon(data = data[data$x < -4, ], aes(x = x, ymin = 0, ymax = y), fill = "blue", alpha = 1) +
+  geom_ribbon(data = data[data$x < -5, ], aes(x = x, ymin = 0, ymax = y), fill = "purple", alpha = 1) +
+  geom_ribbon(data = data[data$x >= 1, ], aes(x = x, ymin = 0, ymax = y), fill = "orange", alpha = 1) +
+  geom_ribbon(data = data[data$x > 2, ], aes(x = x, ymin = 0, ymax = y), fill = "yellow", alpha = 1) +
+  geom_ribbon(data = data[data$x > 3, ], aes(x = x, ymin = 0, ymax = y), fill = "green", alpha = 1) +
+  geom_ribbon(data = data[data$x > 4, ], aes(x = x, ymin = 0, ymax = y), fill = "blue", alpha = 1) +
+  geom_ribbon(data = data[data$x > 5, ], aes(x = x, ymin = 0, ymax = y), fill = "purple", alpha = 1) +
+  geom_text(data=sigmas_df, aes(x=sigma, y = y, label=Prob)) +
+  labs(x = "σ", y = "Probability", title = "Standard Normal Distribution") +
+  theme_minimal()
+
+rainbow_norm
+
+```
+
 
 ## $\alpha = 0.05$
-
-![](/home/sam/Regis/PSY423/QR_Codes/p-value.png){width=700px}
 
 
 ## Practice
