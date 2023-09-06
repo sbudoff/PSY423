@@ -1,0 +1,427 @@
+---
+title: "PSY 423 Class 5"
+author: "S. Budoff"
+date: "2023-09-06"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+gs4_auth(email = "sabudoff@gmail.com")
+
+#Sort the integer values
+coffee_levels <- c("Love it!", "It's good", "No opinion", "It's bad", "Ewwww!")
+shoe_levels <- c("M 0-4.5 / W 0-6",
+                 "M 5-6 / W 6.5-7.5",
+                 "M 6.5-7.5 / W 8-9",
+                 "M 8-9 / W 9.5-10.5",
+                 "M 9.5-10.5 / W 11-12",
+                 "M 11-12 / W 12.5-13.5",
+                 "M 12.5+ / W14+")
+
+url = "https://docs.google.com/spreadsheets/d/18Vj9uuD51ZHRds2Jqve91Cii_x46lJJl5ErrEwb4tKs/edit#gid=976217741"
+df <- read_sheet(url, sheet = "Form Responses 1")
+df <- df %>%
+  mutate(Shoe_Size = factor(`What size shoe do you wear?`, levels=shoe_levels),
+         HairColor = factor(`What color is your hair right now?`),
+         Height = `How tall are you (in inches)?`,
+         Coffee = factor(`How much do you like coffee?`, levels=coffee_levels)) %>%
+  select(Shoe_Size, HairColor, Height, Coffee)
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/FScxGV6bCe7htPkp6"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+
+## Statistical Signifigance
+
+This is our decision point where we decide if we reject our null hypothesis or not
+
+Basically it asks if two values/distributions are "different enough"
+
+Said differently, how confident are we in our decision?
+
+## p-values
+
+The probability your samples came from the same distribution and **differences occurred by chance**, AKA the risk that you will make a **Type I Error**, that is you incorrectly reject a true null hypothesis
+
+
+```{r curve}
+
+# Generate data points for the normal distribution
+x <- seq(-10, 10, length.out = 1000)
+y <- dnorm(x)
+
+sigmas <- seq(-5,5)
+cum_prob <- c()
+for (i in 2:length(sigmas)) {
+  cum_prob <- c(cum_prob, diff(pnorm(c(sigmas[i-1],sigmas[i]))))
+}
+
+sigmas = c(seq(-5,-1), seq(1,5))
+sigmas_df <- data.frame("sigma" = sigmas, "Prob" = cum_prob, "y" = c(0.1, 0.2,0.3, 0.4, 0.45, 0.5, 0.4, 0.3, 0.2, 0.1)) %>%
+  mutate(Prob = sprintf("σ = %.0f => %.1e",sigmas, Prob))
+
+# Create a data frame for plotting
+data <- data.frame(x = x, y = y)
+
+rainbow_norm <- ggplot(data, aes(x = x, y = y)) +
+  geom_line() +
+  geom_ribbon(data = data[data$x < 1, ], aes(x = x, ymin = 0, ymax = y), fill = "red", alpha = 1) +
+  geom_ribbon(data = data[data$x < -1, ], aes(x = x, ymin = 0, ymax = y), fill = "orange", alpha = 1) +
+  geom_ribbon(data = data[data$x < -2, ], aes(x = x, ymin = 0, ymax = y), fill = "yellow", alpha = 1) +
+  geom_ribbon(data = data[data$x < -3, ], aes(x = x, ymin = 0, ymax = y), fill = "green", alpha = 1) +
+  geom_ribbon(data = data[data$x < -4, ], aes(x = x, ymin = 0, ymax = y), fill = "blue", alpha = 1) +
+  geom_ribbon(data = data[data$x < -5, ], aes(x = x, ymin = 0, ymax = y), fill = "purple", alpha = 1) +
+  geom_ribbon(data = data[data$x >= 1, ], aes(x = x, ymin = 0, ymax = y), fill = "orange", alpha = 1) +
+  geom_ribbon(data = data[data$x > 2, ], aes(x = x, ymin = 0, ymax = y), fill = "yellow", alpha = 1) +
+  geom_ribbon(data = data[data$x > 3, ], aes(x = x, ymin = 0, ymax = y), fill = "green", alpha = 1) +
+  geom_ribbon(data = data[data$x > 4, ], aes(x = x, ymin = 0, ymax = y), fill = "blue", alpha = 1) +
+  geom_ribbon(data = data[data$x > 5, ], aes(x = x, ymin = 0, ymax = y), fill = "purple", alpha = 1) +
+  geom_text(data=sigmas_df, aes(x=sigma, y = y, label=Prob)) +
+  theme_minimal()
+
+rainbow_norm
+
+```
+
+
+
+## $\alpha = 0.05$
+
+This is the typical threshold for a significant p-value 
+
+
+## $\alpha = 0.05$
+![](/home/sam/Regis/PSY423/QR_Codes/p-value.png){width=700px}
+
+
+## Practice
+
+What is a p-value in your own words?
+
+Sally has an IQ = 140, which is a z-score of 2.67, is Sally statistically significantly different than the population?
+
+True or False: All normal distributions are symmetrical
+
+True or False: All normal distributions have a mean = 1
+
+True or False: All normal distributions have a standard deviation = 1
+
+True or False: All normal distributions have a total area (probability) under the curve = 1
+
+## Calculating p-values
+
+Simply the sum of the probability of what we observed, the probability of every other event that is as rare AND every event that is rarer
+
+## Important Terminology
+
+
+Practice saying these hypotheses in words
+$$H_0 : \mu_1 = \mu_2$$
+$$H_a : \mu_1 \neq \mu_2$$
+$p < \alpha$ : "Reject the null hypothesis"
+
+$p >= \alpha$ : "Fail to reject the null hypothesis"
+
+Type I error ($\alpha$) - The probability of rejecting a null hypothesis that should NOT be rejected, aka: a false positive
+
+## Low p-values tell you if you are dealing with different distributions, but not how different, this is what Effect Size is for!
+
+
+## Normal Distributions can differ from each other in several ways
+
+In your groups try to image what these are
+
+## Effect Size - Cohen's d
+
+What fraction of the pooled variability observed is the difference between the means?
+
+$$d = \frac{\mu_1 - \mu_2}{\sqrt{\frac{\sigma_1^2 + \sigma_2^2}{2}}}$$
+
+## Have we seen something like this before? 
+
+## Cohen's d (or any effect size statistic) tells us how far apart the distributions are
+
+```{r cohenstable}
+library(knitr)
+
+data.frame(`Effect Size` = c("Small", "Medium", "Large"),
+            Convention = c(0.2, 0.5, 0.8),
+            Overlap = c(0.85, 0.67, 0.53)) %>%
+  kable()
+```
+
+Try drawing roughly what these each look like for yourself
+
+## Small Effect Size
+
+```{r small}
+
+# Desired overlap percentage (e.g., 85%)
+desired_overlap_percentage <- 0.85
+
+# Fixed parameters for the second distribution
+mean2 <- 2
+sd2 <- 1
+
+# Function to calculate overlap percentage given mean and sd of the first distribution
+calculate_overlap_percentage <- function(mean1, sd1) {
+  # Calculate the overlap by integrating the smaller PDF over the overlap range
+  overlap <- integrate(function(x) pmin(dnorm(x, mean = mean1, sd = sd1), dnorm(x, mean = mean2, sd = sd2)),
+                      lower = -Inf, upper = Inf)$value
+  # Return the overlap percentage
+  return(overlap)
+}
+
+# Use an iterative approach to find the mean and sd of the first distribution
+# that achieves the desired overlap percentage
+tolerance <- 0.001  # Tolerance for convergence
+initial_guess_mean1 <- 0
+initial_guess_sd1 <- 1
+mean1 <- initial_guess_mean1
+sd1 <- initial_guess_sd1
+
+while (abs(desired_overlap_percentage - calculate_overlap_percentage(mean1, sd1)) > tolerance) {
+  if (calculate_overlap_percentage(mean1, sd1) < desired_overlap_percentage) {
+    # If the calculated overlap is less than desired, increase the mean
+    mean1 <- mean1 + 0.01
+  } else {
+    # If the calculated overlap is greater than desired, decrease the standard deviation
+    sd1 <- sd1 - 0.01
+  }
+}
+# Calculate the low and high values for the shaded region based on desired overlap
+overlap_range <- qnorm(c((1 - desired_overlap_percentage) / 2, 1 - (1 - desired_overlap_percentage) / 2), 
+                       mean = mean1, sd = sd1)
+
+# Generate x values for the range of the distributions
+x <- seq(min(overlap_range)-3, max(overlap_range)+3, by = 0.01)
+
+# Compute the density values for the two distributions
+density1 <- dnorm(x, mean = mean1, sd = sd1)
+density2 <- dnorm(x, mean = mean2, sd = sd2)
+
+# Create a data frame for ggplot
+df <- data.frame(x = x, density1 = density1, density2 = density2)
+
+# Create the ggplot object
+ggplot(df, aes(x = x)) +
+  
+  # Add the first density curve
+  geom_line(aes(y = density1), color = "blue", size = 1) +
+  
+  # Add the second density curve
+  geom_line(aes(y = density2), color = "red", size = 1) +
+  
+  # Add shaded region
+  # geom_ribbon(data = subset(df, x >= min(overlap_range) & x <= max(overlap_range)), 
+  #             aes(ymin = 0, ymax = pmin(density1, density2)[x >= min(overlap_range) & x <= max(overlap_range)]), 
+  #             fill = "gray", alpha = 0.5) +
+  
+  # Customize labels and title
+  labs(
+    y = "Density",
+    title = "Small effect size"
+  ) +
+  theme_minimal()
+
+# Define the PDF functions for the two normal distributions
+pdf1 <- function(x) dnorm(x, mean = mean1, sd = sd1)
+pdf2 <- function(x) dnorm(x, mean = mean2, sd = sd2)
+
+# Define the range where the overlap occurs (between 1 and 3)
+overlap_range <- c(low, high)
+
+# Calculate the overlap by integrating the smaller PDF over the overlap range
+overlap <- integrate(function(x) pmin(pdf1(x), pdf2(x)), lower = overlap_range[1]-3, upper = overlap_range[2]+3)
+
+# Print the result
+cat("Overlap between the two PDFs:", overlap$value, "\n")
+```
+
+
+## Medium Effect Size
+
+```{r Medium}
+
+# Desired overlap percentage (e.g., 85%)
+desired_overlap_percentage <- 0.67
+
+# Fixed parameters for the second distribution
+mean2 <- 2
+sd2 <- 1
+
+# Function to calculate overlap percentage given mean and sd of the first distribution
+calculate_overlap_percentage <- function(mean1, sd1) {
+  # Calculate the overlap by integrating the smaller PDF over the overlap range
+  overlap <- integrate(function(x) pmin(dnorm(x, mean = mean1, sd = sd1), dnorm(x, mean = mean2, sd = sd2)),
+                      lower = -Inf, upper = Inf)$value
+  # Return the overlap percentage
+  return(overlap)
+}
+
+# Use an iterative approach to find the mean and sd of the first distribution
+# that achieves the desired overlap percentage
+tolerance <- 0.001  # Tolerance for convergence
+initial_guess_mean1 <- 0
+initial_guess_sd1 <- 1
+mean1 <- initial_guess_mean1
+sd1 <- initial_guess_sd1
+
+while (abs(desired_overlap_percentage - calculate_overlap_percentage(mean1, sd1)) > tolerance) {
+  if (calculate_overlap_percentage(mean1, sd1) < desired_overlap_percentage) {
+    # If the calculated overlap is less than desired, increase the mean
+    mean1 <- mean1 + 0.01
+  } else {
+    # If the calculated overlap is greater than desired, decrease the standard deviation
+    sd1 <- sd1 - 0.01
+  }
+}
+# Calculate the low and high values for the shaded region based on desired overlap
+overlap_range <- qnorm(c((1 - desired_overlap_percentage) / 2, 1 - (1 - desired_overlap_percentage) / 2), 
+                       mean = mean1, sd = sd1)
+
+# Generate x values for the range of the distributions
+x <- seq(min(overlap_range)-3, max(overlap_range)+3, by = 0.01)
+
+# Compute the density values for the two distributions
+density1 <- dnorm(x, mean = mean1, sd = sd1)
+density2 <- dnorm(x, mean = mean2, sd = sd2)
+
+# Create a data frame for ggplot
+df <- data.frame(x = x, density1 = density1, density2 = density2)
+
+# Create the ggplot object
+ggplot(df, aes(x = x)) +
+  
+  # Add the first density curve
+  geom_line(aes(y = density1), color = "blue", size = 1) +
+  
+  # Add the second density curve
+  geom_line(aes(y = density2), color = "red", size = 1) +
+  
+  # Add shaded region
+  # geom_ribbon(data = subset(df, x >= min(overlap_range) & x <= max(overlap_range)), 
+  #             aes(ymin = 0, ymax = pmin(density1, density2)[x >= min(overlap_range) & x <= max(overlap_range)]), 
+  #             fill = "gray", alpha = 0.5) +
+  
+  # Customize labels and title
+  labs(
+    y = "Density",
+    title = "Small effect size"
+  ) +
+  theme_minimal()
+
+# Define the PDF functions for the two normal distributions
+pdf1 <- function(x) dnorm(x, mean = mean1, sd = sd1)
+pdf2 <- function(x) dnorm(x, mean = mean2, sd = sd2)
+
+# Define the range where the overlap occurs (between 1 and 3)
+overlap_range <- c(low, high)
+
+# Calculate the overlap by integrating the smaller PDF over the overlap range
+overlap <- integrate(function(x) pmin(pdf1(x), pdf2(x)), lower = overlap_range[1]-3, upper = overlap_range[2]+3)
+
+# Print the result
+cat("Overlap between the two PDFs:", overlap$value, "\n")
+```
+
+
+## Small Effect Size
+
+```{r Large}
+
+# Desired overlap percentage (e.g., 85%)
+desired_overlap_percentage <- 0.8
+
+# Fixed parameters for the second distribution
+mean2 <- 2
+sd2 <- 1
+
+# Function to calculate overlap percentage given mean and sd of the first distribution
+calculate_overlap_percentage <- function(mean1, sd1) {
+  # Calculate the overlap by integrating the smaller PDF over the overlap range
+  overlap <- integrate(function(x) pmin(dnorm(x, mean = mean1, sd = sd1), dnorm(x, mean = mean2, sd = sd2)),
+                      lower = -Inf, upper = Inf)$value
+  # Return the overlap percentage
+  return(overlap)
+}
+
+# Use an iterative approach to find the mean and sd of the first distribution
+# that achieves the desired overlap percentage
+tolerance <- 0.001  # Tolerance for convergence
+initial_guess_mean1 <- 0
+initial_guess_sd1 <- 1
+mean1 <- initial_guess_mean1
+sd1 <- initial_guess_sd1
+
+while (abs(desired_overlap_percentage - calculate_overlap_percentage(mean1, sd1)) > tolerance) {
+  if (calculate_overlap_percentage(mean1, sd1) < desired_overlap_percentage) {
+    # If the calculated overlap is less than desired, increase the mean
+    mean1 <- mean1 + 0.01
+  } else {
+    # If the calculated overlap is greater than desired, decrease the standard deviation
+    sd1 <- sd1 - 0.01
+  }
+}
+# Calculate the low and high values for the shaded region based on desired overlap
+overlap_range <- qnorm(c((1 - desired_overlap_percentage) / 2, 1 - (1 - desired_overlap_percentage) / 2), 
+                       mean = mean1, sd = sd1)
+
+# Generate x values for the range of the distributions
+x <- seq(min(overlap_range)-3, max(overlap_range)+3, by = 0.01)
+
+# Compute the density values for the two distributions
+density1 <- dnorm(x, mean = mean1, sd = sd1)
+density2 <- dnorm(x, mean = mean2, sd = sd2)
+
+# Create a data frame for ggplot
+df <- data.frame(x = x, density1 = density1, density2 = density2)
+
+# Create the ggplot object
+ggplot(df, aes(x = x)) +
+  
+  # Add the first density curve
+  geom_line(aes(y = density1), color = "blue", size = 1) +
+  
+  # Add the second density curve
+  geom_line(aes(y = density2), color = "red", size = 1) +
+  
+  # Add shaded region
+  # geom_ribbon(data = subset(df, x >= min(overlap_range) & x <= max(overlap_range)), 
+  #             aes(ymin = 0, ymax = pmin(density1, density2)[x >= min(overlap_range) & x <= max(overlap_range)]), 
+  #             fill = "gray", alpha = 0.5) +
+  
+  # Customize labels and title
+  labs(
+    y = "Density",
+    title = "Small effect size"
+  ) +
+  theme_minimal()
+
+# Define the PDF functions for the two normal distributions
+pdf1 <- function(x) dnorm(x, mean = mean1, sd = sd1)
+pdf2 <- function(x) dnorm(x, mean = mean2, sd = sd2)
+
+# Define the range where the overlap occurs (between 1 and 3)
+overlap_range <- c(low, high)
+
+# Calculate the overlap by integrating the smaller PDF over the overlap range
+overlap <- integrate(function(x) pmin(pdf1(x), pdf2(x)), lower = overlap_range[1]-3, upper = overlap_range[2]+3)
+
+# Print the result
+cat("Overlap between the two PDFs:", overlap$value, "\n")
+```
