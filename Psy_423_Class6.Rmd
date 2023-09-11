@@ -1,0 +1,99 @@
+---
+title: "PSY 423 Class 6"
+author: "S. Budoff"
+date: "2023-09-11"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+gs4_auth(email = "sabudoff@gmail.com")
+
+#Sort the integer values
+coffee_levels <- c("Love it!", "It's good", "No opinion", "It's bad", "Ewwww!")
+shoe_levels <- c("M 0-4.5 / W 0-6",
+                 "M 5-6 / W 6.5-7.5",
+                 "M 6.5-7.5 / W 8-9",
+                 "M 8-9 / W 9.5-10.5",
+                 "M 9.5-10.5 / W 11-12",
+                 "M 11-12 / W 12.5-13.5",
+                 "M 12.5+ / W14+")
+
+url = "https://docs.google.com/spreadsheets/d/18Vj9uuD51ZHRds2Jqve91Cii_x46lJJl5ErrEwb4tKs/edit#gid=976217741"
+df <- read_sheet(url, sheet = "Form Responses 1")
+df <- df %>%
+  mutate(Shoe_Size = factor(`What size shoe do you wear?`, levels=shoe_levels),
+         HairColor = factor(`What color is your hair right now?`),
+         Height = `How tall are you (in inches)?`,
+         Coffee = factor(`How much do you like coffee?`, levels=coffee_levels)) %>%
+  select(Shoe_Size, HairColor, Height, Coffee)
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/gnhCP36HpQuTmnwa7"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+
+## Confidence Intervals
+
+A set/interval of numbers that contain the parameter we care about a specified percent of time
+
+Usually 95%
+
+If the parameter we care about is the mean, in frequentist statistics it is the interval we predict to contain the sample mean for 95 out of 100 experiments we conduct
+
+
+## How do you think sample size will relate to confidence intervals?
+
+```{r std}
+# Create a data frame with different sample sizes
+sample_sizes <- seq(2, 200, by = 10)
+data <- data.frame(sample_size = sample_sizes)
+
+# Generate means and standard errors for each sample size
+data$mean <- sapply(sample_sizes, function(n) {
+  x <- rnorm(n)  # Generate random data
+  mean(x)
+})
+
+data$std_error <- sapply(sample_sizes, function(n) {
+  x <- rnorm(n)  # Generate random data
+  sd(x) / sqrt(n)  # Calculate standard error
+})
+
+# Create a plot
+ggplot(data, aes(x = sample_size, y = mean, ymin = mean - 1.96 * std_error, ymax = mean + 1.96 * std_error)) +
+  geom_point() +
+  geom_errorbar(width = 0.2) +
+  labs(
+    x = "Sample Size",
+    y = "Mean",
+    title = "Effect of Sample Size on Confidence Interval Width"
+  ) +
+  theme_minimal()
+```
+
+## N's effect on CIs come rom the standard error of the mean
+
+Increasing the sample size decreases the width of confidence intervals, because it decreases the standard error.
+
+Standard error (SE) of estimate is a statistic of the stability and reliability of data. It is the variability across MULTIPLE samples
+
+Standard error is used to estimate the standard deviation, which is the variability across a population, or in the case of a sample standard deviation across a SINGLE sample.
+
+standard error:
+$$\sigma_{\bar{x}} = \frac{s}{\sqrt{n}}$$
+
+
