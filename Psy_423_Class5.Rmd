@@ -309,7 +309,7 @@ ggplot(df, aes(x = x)) +
   # Customize labels and title
   labs(
     y = "Density",
-    title = "Small effect size"
+    title = "Medium effect size"
   ) +
   theme_minimal()
 
@@ -393,7 +393,7 @@ ggplot(df, aes(x = x)) +
   # Customize labels and title
   labs(
     y = "Density",
-    title = "Small effect size"
+    title = "Large effect size"
   ) +
   theme_minimal()
 
@@ -446,4 +446,52 @@ In groups make up an experiment, describe the hypothesis, then describe scenario
 
 ## Confidence Intervals
 
+A set/interval of numbers that contain the parameter we care about a specified percent of time
+
+Usually 95%
+
+If the parameter we care about is the mean, in frequentist statistics it is the interval we predict to contain the sample mean for 95 out of 100 experiments we conduct
+
+## How do you think sample size will relate to confidence intervals?
+
+
+## How do you think sample size will relate to confidence intervals?
+Increasing the sample size decreases the width of confidence intervals, because it decreases the standard error.
+
+Standard error (SE) of estimate is a statistic of the stability and reliability of data. It is the variability across MULTIPLE samples
+
+Standard error is used to estimate the standard deviation, which is the variability across a population, or in the case of a sample standard deviation across a SINGLE sample.
+
+standard error:
+$$\sigma_{\bar{x}} = \frac{s}{\sqrt{n}}$$
+
+## How do you think sample size will relate to confidence intervals?
+
+```{r std}
+# Create a data frame with different sample sizes
+sample_sizes <- seq(2, 200, by = 10)
+data <- data.frame(sample_size = sample_sizes)
+
+# Generate means and standard errors for each sample size
+data$mean <- sapply(sample_sizes, function(n) {
+  x <- rnorm(n)  # Generate random data
+  mean(x)
+})
+
+data$std_error <- sapply(sample_sizes, function(n) {
+  x <- rnorm(n)  # Generate random data
+  sd(x) / sqrt(n)  # Calculate standard error
+})
+
+# Create a plot
+ggplot(data, aes(x = sample_size, y = mean, ymin = mean - 1.96 * std_error, ymax = mean + 1.96 * std_error)) +
+  geom_point() +
+  geom_errorbar(width = 0.2) +
+  labs(
+    x = "Sample Size",
+    y = "Mean",
+    title = "Effect of Sample Size on Confidence Interval Width"
+  ) +
+  theme_minimal()
+```
 
