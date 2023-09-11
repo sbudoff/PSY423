@@ -116,13 +116,17 @@ However, in practice this is not true
 
 ## When to use the Z-test
 
+## When to use the Z-test
+
 1) Our data is a continuous variable 
 
-2) Our data represents a random sample
+2) Our data represents a random sample from an identical distribution
 
-3) We know the standard deviation for the population
+3) We gathered our samples independently of one another
 
-4) We believe our data is normally distributed (at least at the limit)
+4) We know the standard deviation for the population
+
+5) We believe our data is normally distributed (at least at the limit)
 
 In practice the last condition is met when
 $$n \geq 30$$
@@ -153,4 +157,57 @@ $$z = \frac{x - \mu}{\sigma} \implies \frac{x - \bar{x}}{\sigma} $$
 
 When $sigma$ is unknown
 
-$$t = \frac{x - \mu}{\sigma_{\bar{x}}} \implies \frac{x - \bar{x}}{\sigma_{\bar{x}}} = \frac{x - \bar{x}}{\frac{s}{\sqrt{n}}} $$ 
+$$t = \frac{x - \mu}{s_{\bar{x}}} \implies \frac{x - \bar{x}}{s_{\bar{x}}} = \frac{x - \bar{x}}{\frac{s}{\sqrt{n}}} $$ 
+
+## Degrees of freedom, one last idea
+
+In many distributions, including the t-distribution, we accept that we are dealing with uncertainty
+
+We specifically say we are uncertain about our distribution in relation to how many samples we have
+
+Mathematically we call this degrees of freedom (df)
+
+$$df = n-1$$
+
+Why minus 1? Because the mean is estimated, and thus a fixed value
+
+## Visualizing the t-distributions
+# Load the ggplot2 library
+```{r tdists}
+
+# Generate a sequence of x values
+x <- seq(-4, 4, by = 0.01)
+dfs <- c(1, 3, 6, 10, 30)
+# Create a data frame with x values and PDF values for different degrees of freedom
+df <- data.frame(x = rep(x, times = 5), 
+                 df = rep(dfs, each = length(x)),
+                 pdf = dt(x, df = rep(dfs, each = length(x))))
+
+# Create the plot
+ggplot(df, aes(x = x, y = pdf, color = as.factor(df))) +
+  geom_line() +
+  geom_line(data = data.frame(x = x, pdf = dnorm(x)), aes(x = x, y = pdf), linetype = "dashed", color = "black") + # Add the standard normal PDF
+  labs(title = "T-Distribution PDF with Different Degrees of Freedom",
+       x = "x", y = "PDF") +
+  scale_color_discrete(name = "Degrees of Freedom") +
+  theme_minimal()
+```
+
+
+## When to use the t-distribution
+
+
+1) Our data is a continuous variable 
+
+2) Our data represents a random sample from an identical distribution
+
+3) We gathered our samples independently of one another
+
+4) We believe our data is normally distributed (at least at the limit)
+
+<s>5) We know the standard deviation for the population</s>
+
+
+
+
+## Typese of t-tests
