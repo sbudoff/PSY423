@@ -85,15 +85,72 @@ ggplot(data, aes(x = sample_size, y = mean, ymin = mean - 1.96 * std_error, ymax
   theme_minimal()
 ```
 
-## N's effect on CIs come rom the standard error of the mean
+## N's effect on CIs come from the standard error of the mean
 
 Increasing the sample size decreases the width of confidence intervals, because it decreases the standard error.
 
-Standard error (SE) of estimate is a statistic of the stability and reliability of data. It is the variability across MULTIPLE samples
+Standard error (SE or SEM or $\sigma_{\bar{x}}$) of estimate is a statistic of the stability and reliability of data. It is the variability across MULTIPLE samples
 
-Standard error is used to estimate the standard deviation, which is the variability across a population, or in the case of a sample standard deviation across a SINGLE sample.
+Standard error is used to estimate the population standard deviation, which is the variability across a population, or in the case of a sample standard deviation across a SINGLE sample.
 
 standard error:
 $$\sigma_{\bar{x}} = \frac{s}{\sqrt{n}}$$
 
+## How is the 95% CI computed
 
+$$CI = 1.96 * \sigma_{\bar{x}} = 1.96 *\frac{s}{\sqrt{n}}$$
+
+Where does 1.96 come from?
+
+How can we relate this equation to the Z-distribution?
+
+## Revisitting the Z test
+
+We originally described the sample calculation as $$z = \frac{x - \bar{x}}{s} $$ 
+
+Where you first use your raw data to calculate your sample mean ($\bar{x}$), and sample standard deviation ($s$), then you can use these values to standardize your value of interest ($x$).
+
+Because  with the theoretical population, the logic is the same but the symbols are now $\mu$ and $\sigma$ for the population mean and standard deviation respectively, so the formula looks like: $$z = \frac{x - \mu}{\sigma}$$
+
+However, in practice this is not true
+
+## When to use the Z-test
+
+1) Our data is a continuous variable 
+
+2) Our data represents a random sample
+
+3) We know the standard deviation for the population
+
+4) We believe our data is normally distributed (at least at the limit)
+
+In practice the last condition is met when
+$$n \geq 30$$
+
+## Can you think of examples where this is not applicable?
+
+## What is the porblem with using $s$ in place of $\sigma$
+
+
+## How would you correct the Z-test
+
+We can use SEM ($\sigma_{\bar{x}}$)
+
+So in practice we really must compute
+
+$$"z" = \frac{x - \bar{x}}{\sigma_{\bar{x}}} = \frac{x - \bar{x}}{\frac{s}{\sqrt{n}}} $$ 
+
+## Small Sample Sizes are very common
+
+William Sealy Gosset taught us to consider the sample standard deviation in 1908 when he faced this challened
+
+![](/home/sam/Regis/PSY423/gosset.jpg){width=800px}
+
+## The real distributions are thus
+
+When $sigma$ is known
+$$z = \frac{x - \mu}{\sigma} \implies \frac{x - \bar{x}}{\sigma} $$ 
+
+When $sigma$ is unknown
+
+$$t = \frac{x - \mu}{\sigma_{\bar{x}}} \implies \frac{x - \bar{x}}{\sigma_{\bar{x}}} = \frac{x - \bar{x}}{\frac{s}{\sqrt{n}}} $$ 
