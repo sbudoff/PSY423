@@ -45,8 +45,6 @@ plot(qr_code(code_link))
 print(code_link)
 ```
 
-
-
 ## The z and t distributions 
 
 When $sigma$ is known
@@ -183,4 +181,27 @@ $$H_a : \text{Mean}(X_1-X_2) = \bar{d} \neq 0 \text{    OR    } \mu_1 - \mu_2 = 
 $$df = n_1 - 1$$
 
 $$ t = \frac{\bar{d} - 0}{s_{\bar{d}}} = \frac{\bar{d}}{\frac{s_d}{\sqrt{n}}}$$
+
+## JAMOVI example
+
+Will you get better at the Dinosaur Jumping game with a little practice?
+
+1) Turn your phone to airplane mode
+
+2) Open the chrome web browser and search for ibm.com
+
+3) Play the Dinosaur Jumping game once and record the score you got on paper
+
+4) Continue to play the Jumping game until I call time, when I call time record your final score
+
+5) Turn airplone mode off and use this QR code to enter the initial score (Score_0), and the final score (Score_1)
+
+## JAMOVI example
+
+```{r qr_paired}
+code_link <- "https://forms.gle/cMiRFkkjiArtTvkVA"
+plot(qr_code(code_link))
+print(code_link)
+```
+
 
