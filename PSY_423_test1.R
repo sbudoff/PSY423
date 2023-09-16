@@ -69,12 +69,12 @@ paired_data <- data.frame(Anxiety_Pre = rnorm(35, mean = 35, 5),
   # What kind of t-test do you plan to use to test this hypothesis?
 
 # Question 9
-  # Create an appropriate visualization of both sets of observations
+  # Create an appropriate visualization of both sets of observations that is different from how you visualized question 1
 ggplot(paired_data, aes(x=Score, y = Group)) +
   geom_violin() 
 
 ## Question 10
-  # Before doing the statistical test, what do you think the result will be based on your data visualization? 
+  # Before doing anything else like a statistical test, what do you think the result will be based on your data visualization? 
   
 
 ## Question 11
@@ -97,36 +97,55 @@ paired_data <- paired_data %>%
 print(paste0("Min = ", round(unique(paired_data$min),3)))
 print(paste0("Max = ", round(unique(paired_data$max),3)))
 
+#Question 13
+## Create an apropriate plot of theses z-distributions, what do you think the result will be now?
 
-## Question 4
-# The stock broker who is offering you this stock portfolio promise you an average return on investment of 300% 
-# With alpha = 0.05 and the data sample you recieved from this salesman state the null hypothesis for a t-test where 300% is $\mu$.
+paired_data %>%
+  ggplot(aes(x=Z, y = Group)) +
+  geom_violin()
 
-# $H_0: \bar{x} = 5$
-
-## Question 5
+## Question 14
 # Perform a t-test and report the p-value
 
-q5 <- t.test(single_data, mu = 3, alternative = "two.sided")
+pre <- paired_data %>%
+  filter(Group == "Anxiety_Pre") %>%
+  pull(Score)
 
-print(paste0("p=", round(q5$p.value,3)))
+post <- paired_data %>%
+  filter(Group == "Anxiety_Post") %>%
+  pull(Score)
 
-single_data <- single_data %>%
-  mutate(x_bar = mean(ROI),
-         Num = ROI - x_bar,
-         Z = Num/4)
+q14 <- t.test(pre, post, paired = TRUE, alternative = "two.sided")
 
-print()
-print(max(single_data$Z))
 
-## Question 6
-# IWrite the practical conclusion of your test, do you believe this stock broker's claim? 
-# In addition to stating the plane english explanation of your conclusion write a one sentence 
-#formal statistical explanation of your conclusion about the null hypothesis and state the t-statistic, degrees of freedom and p-value.
+print(paste0("p=", round(q14$p.value,3)))
+
+## Question 15
+# Compute Cohen's D. How would you describe the practical signifignace?
+mean_pre <- mean(pre)
+mean_post <- mean(post)
+
+# Pooled standard deviation
+n_pre <- length(pre)
+n_post <- length(post)
+var_pre <- var(pre)
+var_post <- var(post)
+
+pooled_sd <- sqrt(((n_pre - 1) * var_pre + (n_post - 1) * var_post) / (n_pre + n_post - 2))
+
+cohen_d <- (mean_pre - mean_post) / pooled_sd
+
+# Print Cohen's d
+print(paste0("Cohen's d = ", round(abs(cohen_d), 3)))
+
+
+## Question 16
+# Write up the practical conclusion of your test, do you believe this anxiety intervention worked? If so did it help?
+# In addition to stating the plane English explanation of your conclusion write a one sentence 
+#formal statistical explanation of your conclusion about the null hypothesis and state the t-statistic, degrees of freedom, p-value and Cohen's D.
 # There will be a bonus point if you put these numbers in APA format.
 
 
 
 
-t.test(paired_data$Anxiety_Pre, paired_data$Anxiety_Post, paired = TRUE, alternative = "two.sided")
 
