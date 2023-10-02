@@ -51,3 +51,6 @@ rsconnect/
 *.html
 *.png
 *.jpg
+*.omv
+*.pptx
+*.pdf
