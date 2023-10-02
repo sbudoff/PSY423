@@ -148,4 +148,15 @@ print(paste0("Cohen's d = ", round(abs(cohen_d), 3)))
 
 
 
+###########################
+# Data generator:
+seed <- 12
+set.seed(seed)
+# Return on investment of a stock portfolio
+single_data <- data.frame(ROI=rnorm(30,mean = 0.6, sd = 4))
+paired_data <- data.frame(Anxiety_Pre = rnorm(35, mean = 35, 5),
+                          Anxiety_Post = rnorm(35, mean = 35, 2)) 
+
+write_csv(single_data, paste0("/home/sam/Regis/PSY423/Exam1Data/Exam1_",seed,"_data1.csv"))
+write.csv(paired_data, paste0("/home/sam/Regis/PSY423/Exam1Data/Exam1_",seed,"_data2.csv"))
 
