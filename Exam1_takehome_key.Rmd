@@ -1,0 +1,223 @@
+---
+title: "Exam 1 - Home Portion"
+author: "S. Budoff"
+date: "2023-09-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+
+This is a two part exam. 
+
+Part 1 will test you theoretical knowledge in terms of your ability to correctly identify statistical language we have gone over, and your ability to visualize some of these ideas. Part 1 is closed note-book and should be completed during the class period. For questions that ask you to doodle, I am not looking or accuracy in the sense of a computer rendering, however, if there is a key feature you are trying to convey and are worried I will not see it please write an explanation on the side. Please answer your questions on this paper exam and turn it in when you are ready. Each question is worth 2 points.
+
+Part 2 will be take home and you can use any resources you would like, except for your friends/family/acquaintances/house-mates/co-workers/etc (arch-enemies are ok but I will need concrete proof that you hate each other, with p-values and examples). This portion of the exam will be easiest to complete using JAMOVI, but you are welcome to use another statistical language or chatGPT plus R. If you choose to use a Large Language Model, please take screen shots of your full chat log as I would like to see you "showing your work" with these tools. Each question will be worth 1 point and I will scale the resultant score to be 50 points.
+
+IMPORTANT NOTE ON GRADING, please do not be stressed about your grade, I will offer unpenalized retakes during office hours if you are unhappy with how you do today. Take a deep breath and good luck :)
+\newpage
+
+## Take Home Exam 1 Specific Instructions
+
+Please Enter your answer using the google form link/QR code. You will have 24 hours to do this portion of the exam, you may resubmit as many times as you like, but the latest submission during the 24 hour period will be the one I grade. If this feels like it is taking more than an hour or two, I would recommend getting some fresh air and clearing your mind as you are more than likely over-thinking your answers. I am emailing you each individualized datasets in the form of a csv file per dataset. In the email I am also giving you a code number. **Please enter this code number and your regis email name exactly into the google form or your answers will be marked wrong by my auto-grader and this will cause unnecessary stress for us both.**
+
+For all questions with numeric values please enter your answer rounded up to **5 decimal places** ie if you get an answer like 0.123449, enter it like 0.12345. Again the autograder is not smart and will mark things wrong if they are not in the correct format.
+
+For questions that ask you to make a data visualization, save the image as a .jpg or .png file by saving the image directly or taking a screenshot. You will upload these images on the google form that you fill the rest of your answers into.
+
+If you use a large language model like chatGPT please email me the screenshots of your chat log.
+
+```{r qr}
+library(qrcode)
+code_link <- "https://forms.gle/PbX5hcjJewwExd1r7"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+\newpage
+
+## Question 1
+
+You won the lottery, congratulations! While this isn't change your life money, it is enough that you want to invest it into a retirement account. A family friend recommends you use the investor they use, Dernei Nadoff. When you meat Mr. Nadoff he seems very professional and promises a 300% return on your investment if you work with him. He even gives you a long list of satisfied customers willing to recommend his work! 
+
+Before committing you decide it wise to test his claims with your statistical skills, and survey this list of recommendations he gave you. You compile the list's average return on investment (ROI) over the last year. 
+ 
+### A
+
+Create an appropriate visualization to see normality
+
+```{r q1a}
+library(tidyverse)
+
+set.seed(9)
+
+# Return on investment of a stock portfolio
+single_data <- data.frame(ROI=rnorm(30,mean = 0.6, sd = 4))
+
+## Question 1
+ # Create an appropriate visualization to see normality
+ggplot(single_data, aes(x=ROI)) +
+  geom_histogram() 
+
+```
+ 
+### B
+
+What is the mean ROI?
+
+```{r q1b}
+
+```
+
+
+### C
+
+Make this data into a z-score assuming it comes from a population with $\sigma = 4$. What is the largest Z-value? 
+
+
+```{r q1c}
+
+```
+
+### D
+
+What is the smallest?
+
+
+```{r q1d}
+
+```
+
+### E
+
+With alpha = 0.05 and the data sample you recieved , state the null hypothesis for a t-test where 300% is $\mu$.
+
+
+```{r q1e}
+
+```
+
+### F
+
+Perform a t-test and report the p-value
+
+
+```{r q1f}
+
+```
+
+### G
+
+Write the practical conclusion of your test, do you believe this investor's claim? 
+
+In addition to stating the plane english explanation of your conclusion write a one sentence formal statistical explanation of your conclusion about the null hypothesis and state the t-statistic, degrees of freedom and p-value. There will be a bonus point if you put these numbers in APA format.
+
+## Question 2
+
+You just joined the lab of a new faculty researcher who is famous for inventing a new clinical test for anxiety. This professor has a pet theory that chewing bubblegum is directly related to anxiety, and accordingly conducted a study in which participants were measured for anxiety and then given bubblegum to chew everyday for a month before being re-measured. 
+
+The data is in! As your first task in this lab, you are asked to run the statistical analysis on this bubblegum experiment. 
+
+### A
+
+State the null hypothesis.
+
+### B
+
+What kind of t-test do you plan to use to test this hypothesis?
+
+### C
+
+Create an appropriate visualization of both sets of observations that is different from how you visualized question 1
+
+
+```{r q2c}
+
+```
+
+
+### D
+
+Before doing anything else like a statistical test, what do you think the result will be based on your data visualization? 
+  
+
+### E
+
+What is the mean of the first group of scores from this data?
+
+```{r q2d}
+
+```
+
+## F
+
+What is the mean of the second group of scores from this data?
+
+```{r q2f}
+
+```
+
+## G
+Make each score of this data into a z-score assuming it comes from a population with $\sigma = 4$. 
+
+What is the largest Z-value in the first group? 
+
+```{r q2g}
+
+```
+
+## H
+
+What is the largest Z-value in the second group? 
+
+```{r q2h}
+
+```
+
+## G
+
+What is the smallest Z-value in the first group? 
+
+```{r q2g2}
+
+```
+
+## H
+
+What is the smallest Z-value in the second group? 
+
+```{r q2h2}
+
+```
+
+### I
+
+Create an appropriate plot of theses z-distributions, what do you think the result will be now?
+
+```{r q2i}
+
+```
+
+### J
+
+Perform a t-test and report the p-value.
+
+```{r q2j}
+
+```
+
+### K
+
+Compute Cohen's D. How would you describe the practical significance?
+
+```{r q2k}
+
+```
+
+### L
+
+Write up the practical conclusion of your test, do you believe this anxiety intervention worked? If so did it help?
+In addition to stating the plane English explanation of your conclusion write a one sentence formal statistical explanation of your conclusion about the null hypothesis and state the t-statistic, degrees of freedom, p-value and Cohen's D. There will be a bonus point if you put these numbers in APA format.
