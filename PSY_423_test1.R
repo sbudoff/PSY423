@@ -1,6 +1,6 @@
 library(tidyverse)
 
-set.seed(1234)
+set.seed(9)
 
 # Return on investment of a stock portfolio
 single_data <- data.frame(ROI=rnorm(30,mean = 0.6, sd = 4))

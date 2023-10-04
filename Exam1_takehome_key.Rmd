@@ -52,10 +52,12 @@ Create an appropriate visualization to see normality
 ```{r q1a}
 library(tidyverse)
 
-set.seed(9)
+seed <- 9
+path1 <- paste0('/home/sam/Regis/PSY423/Exam1Data/Exam1_',seed,'_data1.csv')
+path2 <- paste0('/home/sam/Regis/PSY423/Exam1Data/Exam1_',seed,'_data2.csv')
 
 # Return on investment of a stock portfolio
-single_data <- data.frame(ROI=rnorm(30,mean = 0.6, sd = 4))
+single_data <- read_csv(path1)
 
 ## Question 1
  # Create an appropriate visualization to see normality
@@ -141,8 +143,8 @@ Create an appropriate visualization of both sets of observations that is differe
 
 
 ```{r q2c}
-paired_data <- data.frame(Anxiety_Pre = rnorm(35, mean = 35, 5),
-                          Anxiety_Post = rnorm(35, mean = 35, 2)) %>%
+paired_data <-  read_csv(path2) %>%
+  select(-`...1`) %>%
   gather("Group", "Score") %>%
   mutate(Group = factor(Group))
 
@@ -250,22 +252,23 @@ print(paste0("p=", round(q14$p.value,3)))
 Compute Cohen's D. How would you describe the practical significance?
 
 ```{r q2k}
-# Compute Cohen's D. How would you describe the practical signifignace?
-mean_pre <- mean(pre)
-mean_post <- mean(post)
-
-# Pooled standard deviation
-n_pre <- length(pre)
-n_post <- length(post)
-var_pre <- var(pre)
-var_post <- var(post)
-
-pooled_sd <- sqrt(((n_pre - 1) * var_pre + (n_post - 1) * var_post) / (n_pre + n_post - 2))
-
-cohen_d <- (mean_pre - mean_post) / pooled_sd
+# Compute Cohen's D for a paired samples t-test
+mean_diff <- mean(pre - post)
+std_dev_diff <- sd(pre - post)
+cohen_d <- mean_diff / std_dev_diff
 
 # Print Cohen's d
-print(paste0("Cohen's d = ", round(abs(cohen_d), 3)))
+if (cohen_d > 0) {
+  sign_desc <- "positive"
+} else if (cohen_d < 0) {
+  sign_desc <- "negative"
+} else {
+  sign_desc <- "no"
+}
+
+print(paste0("Cohen's d = ", round(abs(cohen_d), 3), " (", sign_desc, " effect)"))
+
+
 
 ```
 
