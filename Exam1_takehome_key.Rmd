@@ -69,7 +69,9 @@ ggplot(single_data, aes(x=ROI)) +
 What is the mean ROI?
 
 ```{r q1b}
+q2 <- mean(single_data$ROI)
 
+print(paste0("Mean = ", round(q2,3)))
 ```
 
 
@@ -79,6 +81,10 @@ Make this data into a z-score assuming it comes from a population with $\sigma =
 
 
 ```{r q1c}
+single_data <- single_data %>%
+  mutate(Z = (ROI - mean(ROI))/4)
+
+print(paste0("Min = ", round(min(single_data$Z),3)))
 
 ```
 
@@ -88,7 +94,7 @@ What is the smallest?
 
 
 ```{r q1d}
-
+print(paste0("Max = ", round(max(single_data$Z),3)))
 ```
 
 ### E
@@ -96,16 +102,16 @@ What is the smallest?
 With alpha = 0.05 and the data sample you recieved , state the null hypothesis for a t-test where 300% is $\mu$.
 
 
-```{r q1e}
-
-```
-
 ### F
 
 Perform a t-test and report the p-value
 
 
 ```{r q1f}
+
+q5 <- t.test(single_data, mu = 3, alternative = "two.sided")
+
+print(paste0("p=", round(q5$p.value,8)))
 
 ```
 
@@ -135,7 +141,13 @@ Create an appropriate visualization of both sets of observations that is differe
 
 
 ```{r q2c}
+paired_data <- data.frame(Anxiety_Pre = rnorm(35, mean = 35, 5),
+                          Anxiety_Post = rnorm(35, mean = 35, 2)) %>%
+  gather("Group", "Score") %>%
+  mutate(Group = factor(Group))
 
+ggplot(paired_data, aes(x=Score, y = Group)) +
+  geom_violin() 
 ```
 
 
@@ -149,7 +161,11 @@ Before doing anything else like a statistical test, what do you think the result
 What is the mean of the first group of scores from this data?
 
 ```{r q2d}
+paired_data <- paired_data %>%
+  group_by(Group) %>%
+  mutate(x_bar = mean(Score))
 
+print(paste0("Mean = ", round(unique(paired_data$x_bar[1],3))))
 ```
 
 ## F
@@ -157,7 +173,7 @@ What is the mean of the first group of scores from this data?
 What is the mean of the second group of scores from this data?
 
 ```{r q2f}
-
+print(paste0("Mean = ", round(unique(paired_data$x_bar[2],3))))
 ```
 
 ## G
@@ -166,7 +182,14 @@ Make each score of this data into a z-score assuming it comes from a population 
 What is the largest Z-value in the first group? 
 
 ```{r q2g}
+paired_data <- paired_data %>%
+  group_by(Group) %>%
+  mutate(Z = (Score - mean(Score))/4,
+         min = min(Z),
+         max = max(Z))
 
+
+print(paste0("Max = ", round(unique(paired_data$max[1]),3)))
 ```
 
 ## H
@@ -174,7 +197,7 @@ What is the largest Z-value in the first group?
 What is the largest Z-value in the second group? 
 
 ```{r q2h}
-
+print(paste0("Max = ", round(unique(paired_data$max[2]),3)))
 ```
 
 ## G
@@ -182,7 +205,7 @@ What is the largest Z-value in the second group?
 What is the smallest Z-value in the first group? 
 
 ```{r q2g2}
-
+print(paste0("Min = ", round(unique(paired_data$min[1]),3)))
 ```
 
 ## H
@@ -190,7 +213,7 @@ What is the smallest Z-value in the first group?
 What is the smallest Z-value in the second group? 
 
 ```{r q2h2}
-
+print(paste0("Min = ", round(unique(paired_data$min[2]),3)))
 ```
 
 ### I
@@ -198,7 +221,9 @@ What is the smallest Z-value in the second group?
 Create an appropriate plot of theses z-distributions, what do you think the result will be now?
 
 ```{r q2i}
-
+paired_data %>%
+  ggplot(aes(x=Z, y = Group)) +
+  geom_violin()
 ```
 
 ### J
@@ -206,7 +231,18 @@ Create an appropriate plot of theses z-distributions, what do you think the resu
 Perform a t-test and report the p-value.
 
 ```{r q2j}
+pre <- paired_data %>%
+  filter(Group == "Anxiety_Pre") %>%
+  pull(Score)
 
+post <- paired_data %>%
+  filter(Group == "Anxiety_Post") %>%
+  pull(Score)
+
+q14 <- t.test(pre, post, paired = TRUE, alternative = "two.sided")
+
+
+print(paste0("p=", round(q14$p.value,3)))
 ```
 
 ### K
@@ -214,6 +250,22 @@ Perform a t-test and report the p-value.
 Compute Cohen's D. How would you describe the practical significance?
 
 ```{r q2k}
+# Compute Cohen's D. How would you describe the practical signifignace?
+mean_pre <- mean(pre)
+mean_post <- mean(post)
+
+# Pooled standard deviation
+n_pre <- length(pre)
+n_post <- length(post)
+var_pre <- var(pre)
+var_post <- var(post)
+
+pooled_sd <- sqrt(((n_pre - 1) * var_pre + (n_post - 1) * var_post) / (n_pre + n_post - 2))
+
+cohen_d <- (mean_pre - mean_post) / pooled_sd
+
+# Print Cohen's d
+print(paste0("Cohen's d = ", round(abs(cohen_d), 3)))
 
 ```
 
