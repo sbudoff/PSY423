@@ -1,7 +1,7 @@
 ---
-title: "PSY 423 Class 6"
+title: "PSY 423 Class 12"
 author: "S. Budoff"
-date: "2023-09-11"
+date: "2023-10-10"
 output: ioslides_presentation
 ---
 
@@ -83,6 +83,8 @@ In your groups think of some other scenarios like this where multiple independen
 ## Why not just do 2 separate 1-Factor ANOVAs?
 
 We can study the INTERACTION between factors!
+
+Study systemic variability coming from an additional factor
 
 ## The 2-Factor ANOVA tells you about
 

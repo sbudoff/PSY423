@@ -52,7 +52,7 @@ Create an appropriate visualization to see normality
 ```{r q1a}
 library(tidyverse)
 
-seed <- 1
+seed <- 10
 path1 <- paste0('/home/sam/Regis/PSY423/Exam1Data/Exam1_',seed,'_data1.csv')
 path2 <- paste0('/home/sam/Regis/PSY423/Exam1Data/Exam1_',seed,'_data2.csv')
 
