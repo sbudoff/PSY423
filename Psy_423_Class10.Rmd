@@ -445,20 +445,6 @@ cor_test_result <- cor.test(data$SalePrice, data$Year.Built, method = "pearson")
 
 t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
-## Housing Data Examples
-
-
-```{r house3}
-
-ggplot(data, aes(y=SalePrice, x = Pool.Area)) +
-  geom_point(alpha = 0.3) +
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(data$SalePrice, data$Pool.Area, method = "pearson")
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## Housing Data Examples
 
@@ -474,6 +460,41 @@ cor_test_result <- cor.test(data$SalePrice, data$Garage.Area, method = "pearson"
 ```
 
 t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+## Housing Data Examples
+
+
+```{r house3}
+
+ggplot(data, aes(y=SalePrice, x = Pool.Area)) +
+  geom_point(alpha = 0.3) +
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(data$SalePrice, data$Pool.Area, method = "pearson")
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+
+## Housing Data Examples
+
+
+```{r house3}
+data2 <- data %>%
+  filter(Pool.Area > 0)
+
+
+ggplot(data2, aes(y=SalePrice, x = Pool.Area)) +
+  geom_point(alpha = 0.3) +
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(data2$SalePrice, data2$Pool.Area, method = "pearson")
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
 
 ## Analysis Interpreting the Result
 
