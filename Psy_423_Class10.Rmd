@@ -37,9 +37,12 @@ print(code_link)
   - Interaction: Simple effects analysis
 
 
+## Interaction Plots?
+The interaction plot shows the mean of the dependent variable (y-axis) for each combination of the levels of the two independent variables (x-axis).
 
-## Interaction Plot - No Signifigance
+## Interaction Plot 
 
+No Signifigance
 
 ```{r intplot1}
 
@@ -53,17 +56,19 @@ iv2 <- rep(c("High","Low"), times=150)
 df <- data.frame(dv=dv, iv1=iv1, iv2=iv2)
 # Run two-way ANOVA
 aov_out <- aov(dv ~ iv1*iv2, data=df)
-print(summary(aov_out))
+
 
 # Get Tukey HSD for main effects
 # TukeyHSD(aov_out)
 
 # Check interaction 
 interaction.plot(iv1, iv2, dv)
+# print(summary(aov_out))
 ```
 
-## Interaction Plot - Signifigance but no interaction
+## Interaction Plot
 
+Signifigance but no interaction
 
 ```{r intplot2}
 
@@ -77,17 +82,20 @@ iv2 <- rep(c("High","Low"), times=150)
 df <- data.frame(dv=dv, iv1=iv1, iv2=iv2)
 # Run two-way ANOVA
 aov_out <- aov(dv ~ iv1*iv2, data=df)
-print(summary(aov_out))
+
 
 # Get Tukey HSD for main effects
 # TukeyHSD(aov_out)
 
 # Check interaction 
 interaction.plot(iv1, iv2, dv)
+# print(summary(aov_out))
 ```
 
-## Interaction Plot - Signifigance but no interaction
 
+## Interaction Plot
+
+Interaction is significant
 
 ```{r intplot3}
 set.seed(123)
@@ -109,9 +117,6 @@ interaction.plot(iv1, iv2, dv)
 ```
 
 
-
-
-The interaction plot shows the mean of the dependent variable (y-axis) for each combination of the levels of the two independent variables (x-axis).
 
 ## Interaction Plot Interpretations:
 
@@ -173,6 +178,7 @@ Pearson correlation measures the strength and direction of a linear relationship
 
 It ranges from -1 (perfect negative correlation) to 1 (perfect positive correlation), with 0 indicating no linear correlation.
 
+We call correlation r
 
 
 ## Hypotheses
@@ -192,7 +198,14 @@ ggplot(df, aes(x=X, y=Y)) +
   ggtitle("Perfect Correlation")+
   theme_minimal()
 
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+
 ## What do correlations look like?
 
 ```{r correlationGood}
@@ -206,7 +219,12 @@ ggplot(df, aes(x=X, y=Y)) +
   ggtitle("Strong Correlation")+
   theme_minimal()
 
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## What do correlations look like?
 
@@ -221,7 +239,13 @@ ggplot(df, aes(x=X, y=Y)) +
   ggtitle("Weak Correlation")+
   theme_minimal()
 
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
 ## What do correlations look like?
 
 ```{r correlationNone}
@@ -232,10 +256,160 @@ df <- data_frame(X = rnorm(100, mean = 50),
 
 ggplot(df, aes(x=X, y=Y)) +
   geom_point() +
-  ggtitle("Probabaly No Correlation")+
+  ggtitle("No Correlation")+
   theme_minimal()
 
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+
+## What do correlations look like?
+
+```{r correlationNeg}
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 1)) %>%
+  mutate(Y = -X + 10 + rand)
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Negative Correlation")+
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+## What factors effect r?
+
+Outliers
+
+Restriction of Range 
+
+Nonlinearity
+
+## Outliers
+
+```{r outliers}
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean = 5, sd = 5)) %>%
+  mutate(i = 1:n(),
+         Y = case_when(i < 100 ~ 45 + rand,
+                       TRUE ~ 60 + rand),
+         X = case_when(i < 100 ~ X,
+                       TRUE ~ i-30))
+
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Effect of Outliers")+
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+## Restriction of range
+
+```{r restriction1}
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 1)) %>%
+  mutate(Y = X + 10 + rand)
+
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Strong Correlation")+
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+## Restriction of range
+
+```{r restriction2}
+
+set.seed(1)
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 1)) %>%
+  mutate(Y = X + 10 + rand) %>%
+  filter(X > 49, X < 50)
+
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Effect of Restriction of Range")+
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+
+
+## Nonlinearity
+
+```{r nonlin}
+
+set.seed(1)
+df <- data_frame(X = rnorm(100, mean = 0),
+                 rand = rnorm(100, mean=5, sd = 1)) %>%
+  mutate(Y = X^2 + rand) 
+
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Effect of Nonlinearity")+
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+
+```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+
+
+## Pearson Correlation Assumptions
+
+1) Data is Randomly Selected and Representative 
+
+2) Underlying distributions are approximately normal (and data are continuous)
+
+3) Linear Relationship
+
+4) No outliers
+
+## What is the Pearson Correlation
+
+It is the ratio between the covariance of two variables
+
+It is a normalized measure of covariance, this is why it is always between -1 and 1!
+
+We use a (one-sample) t-test to assess if there is a significant correlation because the Correlation Coefficient (r) follows a t-distribution when our assumptions are true
+
+What is the theoretic mean from our $H_0$?
+
+
 
 ## Housing Data Examples
 
@@ -251,8 +425,10 @@ ggplot(data, aes(y=SalePrice, x = Lot.Area)) +
 
 # Perform correlation test
 cor_test_result <- cor.test(data$SalePrice, data$Lot.Area, method = "pearson")
-print(cor_test_result)
+
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## Housing Data Examples
 
@@ -265,8 +441,9 @@ ggplot(data, aes(y=SalePrice, x = Year.Built)) +
 
 # Perform correlation test
 cor_test_result <- cor.test(data$SalePrice, data$Year.Built, method = "pearson")
-print(cor_test_result)
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## Housing Data Examples
 
@@ -279,9 +456,9 @@ ggplot(data, aes(y=SalePrice, x = Pool.Area)) +
 
 # Perform correlation test
 cor_test_result <- cor.test(data$SalePrice, data$Pool.Area, method = "pearson")
-print(cor_test_result)
 ```
 
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## Housing Data Examples
 
@@ -294,8 +471,9 @@ ggplot(data, aes(y=SalePrice, x = Garage.Area)) +
 
 # Perform correlation test
 cor_test_result <- cor.test(data$SalePrice, data$Garage.Area, method = "pearson")
-print(cor_test_result)
 ```
+
+t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## Analysis Interpreting the Result
 
