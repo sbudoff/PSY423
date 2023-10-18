@@ -89,7 +89,7 @@ interaction.plot(iv1, iv2, dv)
 ## Interaction Plot - Signifigance but no interaction
 
 
-```{r intplot2}
+```{r intplot3}
 set.seed(123)
 group1 <- rnorm(10, mean=10, sd=2) 
 group2 <- rnorm(10, mean=12, sd=3)
@@ -117,12 +117,11 @@ The interaction plot shows the mean of the dependent variable (y-axis) for each 
 
 Parallel lines indicate no interaction between the IVs. The effects of one IV are consistent across all levels of the other IV.
 
-Non-parallel lines indicate an interaction. The effect of one IV depends on the level of the other IV.
+Non-parallel lines indicate a possible interaction. The effect of one IV depends on the level of the other IV.
 
-If the lines cross, this is a significant interaction. The IVs influence each other.
+If the lines cross, this is strong visual evidence for a significant interaction. The IVs influence each other.
 
-If the lines are not parallel but do not cross, the interaction may still be significant, but the IVs do not reverse the effects of each other.
-Things to look for:
+It is also possible for lines to cross if the assumptions (like homoscedasticity) are violated!
 
 ## Questions to ask when looking at Interaction Plots:
 
@@ -151,65 +150,165 @@ Magnitude of the relationship
 
 Direction of the relationship
 
+## What Do Correlations NOT Tell Us?
+
+## What Do Correlations NOT Tell Us?
+
+Causation!
+
+## What is Causation then?
+
+A relationship between variables where variations in one is the best possible explanation for the other
+
+Causation has 2 Preconditions:
+
+1) A significant **correlation**
+2) A precise temporal relationship and theoretic explanation for this relationship
+
+
+
 ## Pearson Correlation
 
 Pearson correlation measures the strength and direction of a linear relationship between two continuous variables.
 
 It ranges from -1 (perfect negative correlation) to 1 (perfect positive correlation), with 0 indicating no linear correlation.
-```{r pearson}
-# Calculate Pearson correlation
-correlation <- cor(data$variable1, data$variable2)
 
-# Create a scatterplot
-plot(data$variable1, data$variable2, main="Scatterplot", xlab="Variable 1", ylab="Variable 2")
+
+
+## Hypotheses
+In correlation, we typically test for the null and alternative hypotheses.
+$$H_0 : \text{No correlation between Variable 1 and Variable 2}$$
+$$H_a : \text{Correlation between Variable 1 and Variable 2}$$
+
+## What do correlations look like?
+
+```{r correlationPerfect}
+
+df <- data_frame(X = rnorm(100, mean = 50)) %>%
+  mutate(Y = X + 10)
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Perfect Correlation")+
+  theme_minimal()
+
+```
+## What do correlations look like?
+
+```{r correlationGood}
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 1)) %>%
+  mutate(Y = X + 10 + rand)
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Strong Correlation")+
+  theme_minimal()
+
+```
+
+## What do correlations look like?
+
+```{r correlationweak}
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 3)) %>%
+  mutate(Y = X + 10 + rand)
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Weak Correlation")+
+  theme_minimal()
+
+```
+## What do correlations look like?
+
+```{r correlationNone}
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 5)) %>%
+  mutate(Y = 45 + rand)
+
+ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Probabaly No Correlation")+
+  theme_minimal()
+
+```
+
+## Housing Data Examples
+
+
+```{r house1}
+data <- read.csv("/home/sam/Regis/PSY423/AmesHousing.csv")
+
+ggplot(data, aes(y=SalePrice, x = Lot.Area)) +
+  geom_point(alpha = 0.3) +
+  scale_x_log10()+
+  scale_y_log10()+
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(data$SalePrice, data$Lot.Area, method = "pearson")
+print(cor_test_result)
+```
+
+## Housing Data Examples
+
+
+```{r house2}
+
+ggplot(data, aes(y=SalePrice, x = Year.Built)) +
+  geom_point(alpha = 0.3) +
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(data$SalePrice, data$Year.Built, method = "pearson")
+print(cor_test_result)
+```
+
+## Housing Data Examples
+
+
+```{r house3}
+
+ggplot(data, aes(y=SalePrice, x = Pool.Area)) +
+  geom_point(alpha = 0.3) +
+  theme_minimal()
+
+# Perform correlation test
+cor_test_result <- cor.test(data$SalePrice, data$Pool.Area, method = "pearson")
+print(cor_test_result)
 ```
 
 
-Slide 5: Hypotheses
-In correlation, we typically test for the null and alternative hypotheses.
-�
-0
-:
-No correlation between Variable 1 and Variable 2
-H 
-0
-​
- :No correlation between Variable 1 and Variable 2
+## Housing Data Examples
 
-�
-�
-:
-Correlation exists between Variable 1 and Variable 2
-H 
-a
-​
- :Correlation exists between Variable 1 and Variable 2
 
-Slide 6: Analysis
-To test for correlation in RStudio, we use the cor.test() function.
-{r
-Copy code
+```{r house4}
+
+ggplot(data, aes(y=SalePrice, x = Garage.Area)) +
+  geom_point(alpha = 0.3) +
+  theme_minimal()
+
 # Perform correlation test
-cor_test_result <- cor.test(data$variable1, data$variable2, method = "pearson")
-Slide 7: Interpreting the Result
-Interpret the result of the correlation test.
-Mention the correlation coefficient, p-value, and the strength of correlation.
-{r
-Copy code
-# Display test result
+cor_test_result <- cor.test(data$SalePrice, data$Garage.Area, method = "pearson")
 print(cor_test_result)
-Slide 8: Visualizing Correlation
+```
+
+## Analysis Interpreting the Result
+
+Interpret the result of the correlation test.
+
+Key values the correlation coefficient, p-value, and the strength of correlation.
+
+
+## Visualizing Correlation
+
 It's often helpful to visualize the correlation.
+
 Show a heatmap to visualize correlations between multiple variables.
-{r
-Copy code
-# Create a correlation heatmap
-heatmap(cor(data_matrix), main="Correlation Heatmap", xlab="Variables", ylab="Variables")
-Slide 9: Cautions
-Correlation does not imply causation.
-Be cautious of confounding variables and the limitations of correlation analysis.
-Slide 10: Summary
-Summarize key points:
-What correlation measures.
-How to test for correlation in RStudio.
-Interpreting correlation results.
+
+
+
