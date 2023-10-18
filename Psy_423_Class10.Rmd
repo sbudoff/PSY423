@@ -1,0 +1,215 @@
+---
+title: "PSY 423 Class 14"
+author: "S. Budoff"
+date: "2023-10-18"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/i3aGWkWkrSUPk6Yn8"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+
+## 2-Factor ANOVA Steps
+
+- Two-way ANOVA 
+
+- Follow up tests
+
+  - Main effects: Tukey's HSD
+
+  - Interaction: Simple effects analysis
+
+
+
+## Interaction Plot - No Signifigance
+
+
+```{r intplot1}
+
+set.seed(123)
+group1 <- rnorm(100, mean=10, sd=2) 
+group2 <- rnorm(100, mean=10, sd=2)
+group3 <- rnorm(100, mean=10, sd=2)
+dv <- c(group1, group2, group3)
+iv1 <- rep(c("A","B","C"), each=100)
+iv2 <- rep(c("High","Low"), times=150) 
+df <- data.frame(dv=dv, iv1=iv1, iv2=iv2)
+# Run two-way ANOVA
+aov_out <- aov(dv ~ iv1*iv2, data=df)
+print(summary(aov_out))
+
+# Get Tukey HSD for main effects
+# TukeyHSD(aov_out)
+
+# Check interaction 
+interaction.plot(iv1, iv2, dv)
+```
+
+## Interaction Plot - Signifigance but no interaction
+
+
+```{r intplot2}
+
+set.seed(123)
+group1 <- rnorm(100, mean=10, sd=2) 
+group2 <- rnorm(100, mean=12, sd=2)
+group3 <- rnorm(100, mean=14, sd=2)
+dv <- c(group1, group2, group3)
+iv1 <- rep(c("A","B","C"), each=100)
+iv2 <- rep(c("High","Low"), times=150) 
+df <- data.frame(dv=dv, iv1=iv1, iv2=iv2)
+# Run two-way ANOVA
+aov_out <- aov(dv ~ iv1*iv2, data=df)
+print(summary(aov_out))
+
+# Get Tukey HSD for main effects
+# TukeyHSD(aov_out)
+
+# Check interaction 
+interaction.plot(iv1, iv2, dv)
+```
+
+## Interaction Plot - Signifigance but no interaction
+
+
+```{r intplot2}
+set.seed(123)
+group1 <- rnorm(10, mean=10, sd=2) 
+group2 <- rnorm(10, mean=12, sd=3)
+group3 <- rnorm(10, mean=14, sd=5)
+dv <- c(group1, group2, group3)
+iv1 <- rep(c("A","B","C"), each=10)
+iv2 <- rep(c("High","Low"), times=15) 
+df <- data.frame(dv=dv, iv1=iv1, iv2=iv2)
+# Run two-way ANOVA
+
+
+# Get Tukey HSD for main effects
+# TukeyHSD(aov_out)
+
+# Check interaction 
+interaction.plot(iv1, iv2, dv)
+```
+
+
+
+
+The interaction plot shows the mean of the dependent variable (y-axis) for each combination of the levels of the two independent variables (x-axis).
+
+## Interaction Plot Interpretations:
+
+Parallel lines indicate no interaction between the IVs. The effects of one IV are consistent across all levels of the other IV.
+
+Non-parallel lines indicate an interaction. The effect of one IV depends on the level of the other IV.
+
+If the lines cross, this is a significant interaction. The IVs influence each other.
+
+If the lines are not parallel but do not cross, the interaction may still be significant, but the IVs do not reverse the effects of each other.
+Things to look for:
+
+## Questions to ask when looking at Interaction Plots:
+
+Are the lines roughly parallel? Or do they cross/diverge?
+
+Does the range of the DV means differ across levels of one IV at different levels of the other IV?
+
+Is there an extreme difference between one particular combination versus the others?
+
+The interaction plot gives a visual depiction of the way the IVs are interacting. It supplements the statistical test of the interaction term in the ANOVA.
+
+
+## Understanding Correlation
+
+Correlation is a statistical concept that helps us understand the relationship between two CONTINUOUS variables.
+
+## Scenarios
+
+Think of scenarios where correlation might be relevant. For example, how might temperature correlate with ice cream sales?
+
+## What Do Correlations Tell Us?
+
+## What Do Correlations Tell Us?
+
+Magnitude of the relationship
+
+Direction of the relationship
+
+## Pearson Correlation
+
+Pearson correlation measures the strength and direction of a linear relationship between two continuous variables.
+
+It ranges from -1 (perfect negative correlation) to 1 (perfect positive correlation), with 0 indicating no linear correlation.
+```{r pearson}
+# Calculate Pearson correlation
+correlation <- cor(data$variable1, data$variable2)
+
+# Create a scatterplot
+plot(data$variable1, data$variable2, main="Scatterplot", xlab="Variable 1", ylab="Variable 2")
+```
+
+
+Slide 5: Hypotheses
+In correlation, we typically test for the null and alternative hypotheses.
+�
+0
+:
+No correlation between Variable 1 and Variable 2
+H 
+0
+​
+ :No correlation between Variable 1 and Variable 2
+
+�
+�
+:
+Correlation exists between Variable 1 and Variable 2
+H 
+a
+​
+ :Correlation exists between Variable 1 and Variable 2
+
+Slide 6: Analysis
+To test for correlation in RStudio, we use the cor.test() function.
+{r
+Copy code
+# Perform correlation test
+cor_test_result <- cor.test(data$variable1, data$variable2, method = "pearson")
+Slide 7: Interpreting the Result
+Interpret the result of the correlation test.
+Mention the correlation coefficient, p-value, and the strength of correlation.
+{r
+Copy code
+# Display test result
+print(cor_test_result)
+Slide 8: Visualizing Correlation
+It's often helpful to visualize the correlation.
+Show a heatmap to visualize correlations between multiple variables.
+{r
+Copy code
+# Create a correlation heatmap
+heatmap(cor(data_matrix), main="Correlation Heatmap", xlab="Variables", ylab="Variables")
+Slide 9: Cautions
+Correlation does not imply causation.
+Be cautious of confounding variables and the limitations of correlation analysis.
+Slide 10: Summary
+Summarize key points:
+What correlation measures.
+How to test for correlation in RStudio.
+Interpreting correlation results.
