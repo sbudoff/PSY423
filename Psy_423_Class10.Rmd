@@ -480,7 +480,7 @@ t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_te
 ## Housing Data Examples
 
 
-```{r house3}
+```{r house5}
 data2 <- data %>%
   filter(Pool.Area > 0)
 
