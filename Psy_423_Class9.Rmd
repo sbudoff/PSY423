@@ -1,0 +1,99 @@
+---
+title: "PSY 423 Class 12"
+author: "S. Budoff"
+date: "2023-10-16"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/YFDg9aH1dzWLoRRA7"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+
+## The 2-Factor ANOVA tells you about
+
+How Factor A relates to the dependent variable
+
+How Factor B relates to the dependent variable
+
+How Factor A and Factor B interact in relation to the dependent variable
+
+
+## Example Set up
+
+2+ levels of IV1 (e.g. Drug A, B, C)
+
+2+ levels of IV2 (Low (A), High Dosage (B))
+
+1 continuous DV (e.g. anxiety)
+
+What are the hypothesis we are testing?
+
+
+## Hypotheses
+
+$$H_0: \mu_{A} = \mu_{B} = \mu_{C}$$
+
+$$H_a: \text{at least one mean differs}$$
+
+$$H_0: \mu_\text{Low} = \mu_\text{High}$$
+$$H_a: \mu_\text{Low} \neq \mu_\text{High}$$
+
+$$H_0: \text{No Interaction}$$
+$$H_a: \text{Significant Interaction}$$
+
+## JAMOVI Time
+
+
+## Example 2
+
+Male vs Female Sumo Wrestlers, the hypothesis are....
+
+## Example 3 
+
+AMES Housing Dataset
+
+Let's assess Sale Price against pairs of continuous variables
+
+
+## Interaction Plot
+
+The interaction plot shows the mean of the dependent variable (y-axis) for each combination of the levels of the two independent variables (x-axis).
+
+## Interaction Plot Interpretations:
+
+Parallel lines indicate no interaction between the IVs. The effects of one IV are consistent across all levels of the other IV.
+
+Non-parallel lines indicate an interaction. The effect of one IV depends on the level of the other IV.
+
+If the lines cross, this is a significant interaction. The IVs influence each other.
+
+If the lines are not parallel but do not cross, the interaction may still be significant, but the IVs do not reverse the effects of each other.
+Things to look for:
+
+## Questions to ask when looking at Interaction Plots:
+
+Are the lines roughly parallel? Or do they cross/diverge?
+
+Does the range of the DV means differ across levels of one IV at different levels of the other IV?
+
+Is there an extreme difference between one particular combination versus the others?
+
+The interaction plot gives a visual depiction of the way the IVs are interacting. It supplements the statistical test of the interaction term in the ANOVA.
+
