@@ -1,0 +1,252 @@
+---
+title: "PSY 423 Class 15"
+author: "S. Budoff"
+date: "2023-10-25"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/VedM7MGCWEwH5qgq6"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+
+## Applying Correlation in Psychometrics
+
+
+The field of study concerned with the measurement of psychological attributes and constructs.
+
+Two fundamental concepts in psychometrics are reliability and validity, which play a crucial role when examining relationships between variables, such as in correlations.
+
+
+## Reliability
+
+Refers to the consistency and stability of measurements over time or across different situations.
+
+In the context of correlations, reliable ensure that the relationship between variables is accurately captured.
+
+Common methods for assessing reliability include: 
+
+- test-retest reliability 
+
+- Split-Half test 
+
+- Cronbach's $\alpha$
+
+
+## Validity
+
+Refers to the extent to which a test or measurement instrument accurately assesses the construct it is intended to measure.
+
+In correlation studies, validity is essential to ensure that the variables being studied truly represent the concepts of interest.
+
+## Content Validity
+
+Content validity involves examining the relevance and representativeness of the items in a test in relation to the construct being measured.
+
+For correlations, content validity ensures that the variables being correlated are pertinent to the research question.
+
+For example, the material on a comprehensive final exam
+
+## Construct Validity
+
+Construct validity assesses whether the test or measure accurately reflects the theoretical construct it is intended to represent.
+
+In correlation studies, construct validity is vital to confirm that the variables being correlated indeed reflect the underlying psychological constructs.
+
+For example if you are studying agoraphobia, you may like your measure to differentiate features of anxiety from features of arachnophobia 
+
+## Criterion-Related Validity
+
+Criterion-related validity evaluates the extent to which a test predicts or correlates with a relevant criterion.
+
+When studying correlations, criterion-related validity helps establish that the variables being correlated have meaningful relationships with external criteria.
+
+Typically, this is a comparison with a gold-standard or otherwise exisitng measure
+
+For example, if you develope a new intelligence test comparing participant's scores with the classic IQ test
+
+## Try to come up with your own examples:
+
+- Content
+
+- Construct
+
+- Criterion
+
+## The Interplay
+
+Reliability and validity are interrelated. 
+
+A reliable measure is a prerequisite for a valid measure, and a valid measure must also be reliable.
+
+In correlation research, ensuring both reliability and validity is essential to draw accurate and meaningful conclusions about the relationships between variables.
+
+## Conclusion of Reliability and Validity
+
+Reliability and validity are essential concepts in psychometrics when conducting correlation studies.
+
+Reliability ensures that measurements are consistent and stable over time, while validity ensures that measurements accurately reflect the constructs of interest.
+
+Balancing both reliability and validity is crucial for robust and meaningful correlations in psychological research.
+
+
+## Regression 
+
+```{r corr}
+# Create a single dataframe with different correlation scenarios
+df <- data.frame(
+  X = rnorm(400, mean = 50),
+  Y = NA,
+  Correlation = factor(rep(c("Perfect", "Strong", "Weak", "No"), each = 100))
+)
+
+set.seed(123)  # For reproducibility
+df$Y[df$Correlation == "Perfect"] <- df$X[df$Correlation == "Perfect"] + 10
+df$Y[df$Correlation == "Strong"] <- df$X[df$Correlation == "Strong"] + 10 + rnorm(100, mean = 5, sd = 1)
+df$Y[df$Correlation == "Weak"] <- df$X[df$Correlation == "Weak"] + 10 + rnorm(100, mean = 5, sd = 3)
+df$Y[df$Correlation == "No"] <- 45 + rnorm(100, mean = 5, sd = 5)
+
+## Compute Pearson's R and R-squared for each group
+correlation_data <- df %>%
+  group_by(Correlation) %>%
+  summarise(Pearson_R = cor(X, Y), R_Squared = cor(X, Y)^2)
+
+
+# Create a single plot using facet_grid with Pearson's R annotations
+ggplot(df, aes(x = X, y = Y)) +
+  geom_point() +
+  geom_text(data = correlation_data, aes(x = 48, y = 80, label = paste("R =", round(Pearson_R, 2))), hjust = 0, vjust = 0) +
+  ylim(40,85) +
+  ggtitle("Correlation Scenarios") +
+  theme_minimal() +
+  facet_wrap(. ~ Correlation)
+
+```
+
+
+## Regression 
+
+```{r Regr}
+# Create a single plot using facet_grid with Pearson's R and R-squared annotations and regression lines
+ggplot(df, aes(x = X, y = Y)) +
+  geom_point() +
+  geom_text(data = correlation_data, aes(x = 48, y = 75, label = paste("R =", round(Pearson_R, 2), "\nR^2 =", round(R_Squared, 2))), hjust = 0, vjust = 0) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  ylim(40, 85) +
+  ggtitle("Correlation Scenarios with Regression Line and R-squared") +
+  theme_minimal() +
+  facet_wrap(. ~ Correlation)
+
+```
+
+## Regression Key Ideas
+
+Regression is a statistical technique used to model the relationship between a dependent variable $Y$ and one or more independent variables $X$.
+
+It aims to find the best-fitting line (or curve) that describes this relationship.
+
+## Types of Regression
+
+Linear Regression: Models a linear relationship between variables.
+
+Multiple Regression: Includes more than one independent variable.
+
+Polynomial Regression: Models nonlinear relationships using polynomial functions.
+
+Logistic Regression: Used for binary or categorical outcomes.
+
+## Correlation vs. Regression
+
+Correlation measures the strength and direction of a linear relationship between two variables without making predictions.
+
+Regression not only measures the relationship but **also predicts** values of the dependent variable based on the independent variable(s).
+
+## Pearson's R and Regression
+
+Pearson's correlation coefficient $R$ quantifies the strength and direction of a linear relationship between two variables.
+
+In regression, $R$ still helps us understand how well the model fits the data.
+
+## R-squared (AKA R^2 AKA $R^2$ AKA $R*R$)
+
+R-squared is a measure of how well the regression model explains the variability in the dependent variable.
+
+It quantifies the proportion of variance in Y explained by the independent variable(s).
+
+## R-squared and Pearson's R
+
+$R^2$ and Pearson's R both measure the strength of the relationship between variables.
+
+However, $R^2$ provides a clearer indication of how well the regression model fits the data.
+
+## WHy is $R^2$ Clearer?
+
+- Interpretability - For example, $R^2$ = 0.8 means 80% of the variability in the dependent variable is accounted for by the independent variable(s)
+
+- Model Fit - You can have a relatively high R but it does not tell you anything about your model
+
+- Comparing Models - $R^2$ does not care how many independent variables a model has so you can compare models with different numbers o these
+
+- Prediction Accuracy - Again, $R^2$ is all about how good your model is at explaining variability
+
+
+
+## Interpreting $R^2$
+
+R-squared ranges from 0 to 1, with higher values indicating better fit.
+
+
+An R-squared of 0 means the model explains none of the variance, while 1 means it explains all the variance.
+
+Why can it not be negative?
+
+## Regression Asumptions
+
+Linear Relationship between IV(s) and DV
+
+Normal Distributions
+
+Random Selection
+
+No Multicollinearity
+
+## Multicollinearity
+
+When predictors (IVs) are too highly correlated
+
+This assumption is opnly important in multiple linear regression
+
+For example if you are trying to predict a dogs age and the predictors are hind limb length and height this would probably be a situation with multicollinearity
+
+In your groups think of other such scenarios
+
+## Regression Model
+
+$$Y = mx + b + \epsilon = \beta_0 + \beta_1x + \epsilon = \Sigma_{i=0}^{k} \beta_ix_i+ \epsilon $$
+
+## Regression Model
+
+$$Y = mx + b + \epsilon = \beta_0 + \beta_1x + \epsilon = \Sigma_{i=0}^{k} \beta_ix_i+ \epsilon $$
+
+In your groups think about how $\epsilon$ relates to $R^2$
+
+
+
+
+## JAMOVI Workflow

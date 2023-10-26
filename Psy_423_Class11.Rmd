@@ -54,99 +54,43 @@ $$H_a : \text{Correlation between Variable 1 and Variable 2}$$
 df <- data_frame(X = rnorm(100, mean = 50)) %>%
   mutate(Y = X + 10)
 
-ggplot(df, aes(x=X, y=Y)) +
+plot1<-ggplot(df, aes(x=X, y=Y)) +
   geom_point() +
   ggtitle("Perfect Correlation")+
   theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-
-## What do correlations look like?
-
-```{r correlationGood}
 
 df <- data_frame(X = rnorm(100, mean = 50),
                  rand = rnorm(100, mean=5, sd = 1)) %>%
   mutate(Y = X + 10 + rand)
 
-ggplot(df, aes(x=X, y=Y)) +
+plot2 <- ggplot(df, aes(x=X, y=Y)) +
   geom_point() +
   ggtitle("Strong Correlation")+
   theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-## What do correlations look like?
-
-```{r correlationweak}
 
 df <- data_frame(X = rnorm(100, mean = 50),
                  rand = rnorm(100, mean=5, sd = 3)) %>%
   mutate(Y = X + 10 + rand)
 
-ggplot(df, aes(x=X, y=Y)) +
+plot3<-ggplot(df, aes(x=X, y=Y)) +
   geom_point() +
   ggtitle("Weak Correlation")+
   theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-## What do correlations look like?
-
-```{r correlationNone}
 
 df <- data_frame(X = rnorm(100, mean = 50),
                  rand = rnorm(100, mean=5, sd = 5)) %>%
   mutate(Y = 45 + rand)
 
-ggplot(df, aes(x=X, y=Y)) +
+plot4<-ggplot(df, aes(x=X, y=Y)) +
   geom_point() +
   ggtitle("No Correlation")+
   theme_minimal()
 
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
+library(patchwork)
+plot1+plot2+plot3+plot4
 
 ```
 
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-
-## What do correlations look like?
-
-```{r correlationNeg}
-
-df <- data_frame(X = rnorm(100, mean = 50),
-                 rand = rnorm(100, mean=5, sd = 1)) %>%
-  mutate(Y = -X + 10 + rand)
-
-ggplot(df, aes(x=X, y=Y)) +
-  geom_point() +
-  ggtitle("Negative Correlation")+
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
 
 ## What factors effect r?
 
@@ -155,100 +99,6 @@ Outliers
 Restriction of Range 
 
 Nonlinearity
-
-## Outliers
-
-```{r outliers}
-
-df <- data_frame(X = rnorm(100, mean = 50),
-                 rand = rnorm(100, mean = 5, sd = 5)) %>%
-  mutate(i = 1:n(),
-         Y = case_when(i < 100 ~ 45 + rand,
-                       TRUE ~ 60 + rand),
-         X = case_when(i < 100 ~ X,
-                       TRUE ~ i-30))
-
-
-ggplot(df, aes(x=X, y=Y)) +
-  geom_point() +
-  ggtitle("Effect of Outliers")+
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-## Restriction of range
-
-```{r restriction1}
-
-df <- data_frame(X = rnorm(100, mean = 50),
-                 rand = rnorm(100, mean=5, sd = 1)) %>%
-  mutate(Y = X + 10 + rand)
-
-
-ggplot(df, aes(x=X, y=Y)) +
-  geom_point() +
-  ggtitle("Strong Correlation")+
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-## Restriction of range
-
-```{r restriction2}
-
-set.seed(1)
-df <- data_frame(X = rnorm(100, mean = 50),
-                 rand = rnorm(100, mean=5, sd = 1)) %>%
-  mutate(Y = X + 10 + rand) %>%
-  filter(X > 49, X < 50)
-
-
-ggplot(df, aes(x=X, y=Y)) +
-  geom_point() +
-  ggtitle("Effect of Restriction of Range")+
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-
-
-## Nonlinearity
-
-```{r nonlin}
-
-set.seed(1)
-df <- data_frame(X = rnorm(100, mean = 0),
-                 rand = rnorm(100, mean=5, sd = 1)) %>%
-  mutate(Y = X^2 + rand) 
-
-
-ggplot(df, aes(x=X, y=Y)) +
-  geom_point() +
-  ggtitle("Effect of Nonlinearity")+
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(df$Y, df$X, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
 
 ## Pearson Correlation Assumptions
 
@@ -260,115 +110,135 @@ t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_te
 
 4) No outliers
 
-## What is the Pearson Correlation
-
-It is the ratio between the covariance of two variables
-
-It is a normalized measure of covariance, this is why it is always between -1 and 1!
-
-We use a (one-sample) t-test to assess if there is a significant correlation because the Correlation Coefficient (r) follows a t-distribution when our assumptions are true
-
-What is the theoretic mean from our $H_0$?
+## Applying Correlation in Psychometrics
 
 
+The field of study concerned with the measurement of psychological attributes and constructs.
 
-## Housing Data Examples
-
-
-```{r house1}
-data <- read.csv("/home/sam/Regis/PSY423/AmesHousing.csv")
-
-ggplot(data, aes(y=SalePrice, x = Lot.Area)) +
-  geom_point(alpha = 0.3) +
-  scale_x_log10()+
-  scale_y_log10()+
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(data$SalePrice, data$Lot.Area, method = "pearson")
-
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-## Housing Data Examples
+Two fundamental concepts in psychometrics are reliability and validity, which play a crucial role when examining relationships between variables, such as in correlations.
 
 
-```{r house2}
+## Reliability
 
-ggplot(data, aes(y=SalePrice, x = Year.Built)) +
-  geom_point(alpha = 0.3) +
-  theme_minimal()
+Refers to the consistency and stability of measurements over time or across different situations.
 
-# Perform correlation test
-cor_test_result <- cor.test(data$SalePrice, data$Year.Built, method = "pearson")
-```
+In the context of correlations, reliable ensure that the relationship between variables is accurately captured.
 
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
+Common methods for assessing reliability include: 
+- test-retest reliability 
+- Split-Half test 
+- Cronbach's $\alpha$
+
+## Test-Retest Reliability
+
+Assesses the consistency of measurements by comparing results from the same test administered at two different points in time.
+
+In correlation studies, if the measurements are not reliable, the observed relationships between variables may be due to measurement error rather than true associations.
+
+## Split-Half Testing
+
+Split-Half testing is a method used to assess the internal consistency reliability of a measurement instrument.
+
+In this approach, a test or scale is divided into two halves, and the scores on each half are correlated.
+
+The correlation coefficient is typically used to assess the degree to which both halves yield similar results.
+
+## Advantages of Split-Half Testing
+
+Provides a quick and straightforward way to estimate internal consistency.
+
+Requires less time and resources compared to other reliability assessment methods.
+
+Allows for an initial assessment of the reliability of a measurement instrument.
+
+## Limitations of Split-Half Testing
+
+The reliability estimate may be influenced by the specific way in which the test is divided into halves.
+
+The reliability estimate may be lower than the true internal consistency, especially for short tests.
+
+## Cronbach's Alpha ($\alpha$)
+
+Cronbach's Alpha, also known as coefficient $\alpha$, is a widely used method to assess internal consistency reliability.
+
+It is a more sophisticated and accurate measure than split-half testing and is suitable for a wide range of measurement instruments, including multi-item scales.
+
+## Calculating Cronbach's $\alpha$
+
+Cronbach's $\alpha$ is calculated based on the average intercorrelation among all items in a scale.
+It assesses how closely items are related to one another, providing a more comprehensive measure of internal consistency.
+
+## Interpretation of Cronbach's $\alpha$
+
+Cronbach's $\alpha$ values range from 0 to 1.
+
+A higher Cronbach's $\alpha$ indicates greater internal consistency, with values above 0.7 generally considered acceptable, and values above 0.8 are often preferred in psychological research.
+
+## Advantages of Cronbach's $\alpha$
+
+Provides a more accurate and comprehensive estimate of internal consistency.
+
+Suitable for measuring the reliability of complex measurement instruments, including multi-item scales
+
+## JAMOVI Time
+
+## Validity
+
+Refers to the extent to which a test or measurement instrument accurately assesses the construct it is intended to measure.
+
+In correlation studies, validity is essential to ensure that the variables being studied truly represent the concepts of interest.
+
+## Content Validity
+
+Content validity involves examining the relevance and representativeness of the items in a test in relation to the construct being measured.
+
+For correlations, content validity ensures that the variables being correlated are pertinent to the research question.
+
+For example, the material on a comprehensive final exam
+
+## Construct Validity
+
+Construct validity assesses whether the test or measure accurately reflects the theoretical construct it is intended to represent.
+
+In correlation studies, construct validity is vital to confirm that the variables being correlated indeed reflect the underlying psychological constructs.
+
+For example if you are studying agoraphobia, you may like your measure to differentiate features of anxiety from features of arachnophobia 
+
+## Criterion-Related Validity
+
+Criterion-related validity evaluates the extent to which a test predicts or correlates with a relevant criterion.
+
+When studying correlations, criterion-related validity helps establish that the variables being correlated have meaningful relationships with external criteria.
+
+Typically, this is a comparison with a gold-standard or otherwise exisitng measure
+
+For example, if you develope a new intelligence test comparing participant's scores with the classic IQ test
+
+## Try to come up with your own examples:
+
+- Content
+
+- Construct
+
+- Criterion
+
+## The Interplay
+
+Reliability and validity are interrelated. 
+
+A reliable measure is a prerequisite for a valid measure, and a valid measure must also be reliable.
+
+In correlation research, ensuring both reliability and validity is essential to draw accurate and meaningful conclusions about the relationships between variables.
+
+## Conclusion
+
+Reliability and validity are essential concepts in psychometrics when conducting correlation studies.
+
+Reliability ensures that measurements are consistent and stable over time, while validity ensures that measurements accurately reflect the constructs of interest.
+
+Balancing both reliability and validity is crucial for robust and meaningful correlations in psychological research.
 
 
-## Housing Data Examples
-
-
-```{r house4}
-
-ggplot(data, aes(y=SalePrice, x = Garage.Area)) +
-  geom_point(alpha = 0.3) +
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(data$SalePrice, data$Garage.Area, method = "pearson")
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-## Housing Data Examples
-
-
-```{r house3}
-
-ggplot(data, aes(y=SalePrice, x = Pool.Area)) +
-  geom_point(alpha = 0.3) +
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(data$SalePrice, data$Pool.Area, method = "pearson")
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-
-## Housing Data Examples
-
-
-```{r house5}
-data2 <- data %>%
-  filter(Pool.Area > 0)
-
-
-ggplot(data2, aes(y=SalePrice, x = Pool.Area)) +
-  geom_point(alpha = 0.3) +
-  theme_minimal()
-
-# Perform correlation test
-cor_test_result <- cor.test(data2$SalePrice, data2$Pool.Area, method = "pearson")
-```
-
-t(`r cor_test_result$parameter`) = `r cor_test_result$statistic`, p = `r  cor_test_result$p.value`, r = `r  cor_test_result$estimate`)
-
-
-## Analysis Interpreting the Result
-
-Interpret the result of the correlation test.
-
-Key values the correlation coefficient, p-value, and the strength of correlation.
-
-
-## Visualizing Correlation
-
-It's often helpful to visualize the correlation.
-
-Show a heatmap to visualize correlations between multiple variables.
 
 
 
