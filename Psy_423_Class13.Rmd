@@ -1,0 +1,109 @@
+---
+title: "PSY 423 Class 16"
+author: "S. Budoff"
+date: "2023-10-25"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/zJ3H9YoMZPKZrxrx7"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+
+
+## Regression 
+
+```{r Regr}
+# Create a single plot using facet_grid with Pearson's R and R-squared annotations and regression lines
+ggplot(df, aes(x = X, y = Y)) +
+  geom_point() +
+  geom_text(data = correlation_data, aes(x = 48, y = 75, label = paste("R =", round(Pearson_R, 2), "\nR^2 =", round(R_Squared, 2))), hjust = 0, vjust = 0) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  ylim(40, 85) +
+  ggtitle("Correlation Scenarios with Regression Line and R-squared") +
+  theme_minimal() +
+  facet_wrap(. ~ Correlation)
+
+```
+
+## Regression Key Ideas
+
+Regression is a statistical technique used to model the relationship between a dependent variable $Y$ and one or more independent variables $X$.
+
+It aims to find the best-fitting line (or curve) that describes this relationship.
+
+## Interpreting $R^2$
+
+R-squared ranges from 0 to 1, with higher values indicating better fit.
+
+
+An R-squared of 0 means the model explains none of the variance, while 1 means it explains all the variance.
+
+Why can it not be negative?
+
+## Regression Asumptions
+
+Linear Relationship between IV(s) and DV
+
+Normal Distributions
+
+Random Selection
+
+No Multicollinearity
+
+
+## Regression Model
+
+$$Y = mx + b  = \beta_0 + \beta_1x  = \Sigma_{i=0}^{k} \beta_ix_i $$
+
+## Regression Model
+
+$$Y = mx + b + \epsilon = \beta_0 + \beta_1x + \epsilon = \Sigma_{i=0}^{k} \beta_ix_i+ \epsilon $$
+
+In your groups think about how $\epsilon$ relates to $R^2$
+
+
+## JAMOVI Workflow
+
+## P- values and Regression
+
+In regression, it helps us assess the significance of our model's coefficients.
+
+## Hypothesis testing 
+
+In simple linear regression, we often want to test if the slope of the regression line is statistically different from zero.
+
+Null hypothesis ($H_0$): The slope ($\beta_1$) equals zero.
+Alternative hypothesis ($H_a$): The slope ($\beta_1$) is not equal to zero.
+
+## Some more Fun with t-tests
+
+The t-statistic measures how many standard errors $\beta_1$ is away from zero.
+
+
+It's calculated as $t = \frac{\beta_1 - 0}{SE(\beta_1)}
+
+where $SE(\beta_1)$ is the standard error of the slope estimate.
+
+
+## Degrees of Freedom
+
+The degrees of freedom for the t-distribution is (n - 2), where n is the number of data points.
+
+We subtract 2 because we have estimated two parameters: the intercept and the slope.
