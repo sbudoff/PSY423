@@ -1,0 +1,393 @@
+---
+title: "Exam 1 - Home Portion"
+author: "S. Budoff"
+date: "2023-09-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+
+This is a two part exam. 
+
+Part 1 will test you theoretical knowledge in terms of your ability to correctly identify statistical language we have gone over, and your ability to visualize some of these ideas. Part 1 is closed note-book and should be completed during the class period. For questions that ask you to doodle, I am not looking or accuracy in the sense of a computer rendering, however, if there is a key feature you are trying to convey and are worried I will not see it please write an explanation on the side. Please answer your questions on this paper exam and turn it in when you are ready. Each question is worth 2 points.
+
+Part 2 will be take home and you can use any resources you would like, except for your friends/family/acquaintances/house-mates/co-workers/etc (arch-enemies are ok but I will need concrete proof that you hate each other, with p-values and examples). This portion of the exam will be easiest to complete using JAMOVI, but you are welcome to use another statistical language or chatGPT plus R. If you choose to use a Large Language Model, please take screen shots of your full chat log as I would like to see you "showing your work" with these tools. Each question will be worth 1 point and I will scale the resultant score to be 50 points.
+
+IMPORTANT NOTE ON GRADING, please do not be stressed about your grade, I will offer unpenalized retakes during office hours if you are unhappy with how you do today. Take a deep breath and good luck :)
+\newpage
+
+## Take Home Exam 1 Specific Instructions
+
+Please Enter your answer using the google form link/QR code. You will have 24 hours to do this portion of the exam, you may resubmit as many times as you like, but the latest submission during the 24 hour period will be the one I grade. If this feels like it is taking more than an hour or two, I would recommend getting some fresh air and clearing your mind as you are more than likely over-thinking your answers. I am emailing you each individualized datasets in the form of a csv file per dataset. In the email I am also giving you a code number. **Please enter this code number and your regis email name exactly into the google form or your answers will be marked wrong by my auto-grader and this will cause unnecessary stress for us both.**
+
+For all questions with numeric values please enter your answer rounded up to **5 decimal places** ie if you get an answer like 0.123449, enter it like 0.12345. Again the autograder is not smart and will mark things wrong if they are not in the correct format.
+
+For questions that ask you to make a data visualization, save the image as a .jpg or .png file by saving the image directly or taking a screenshot. You will upload these images on the google form that you fill the rest of your answers into.
+
+If you use a large language model like chatGPT please email me the screenshots of your chat log.
+
+```{r qr}
+library(qrcode)
+code_link <- "https://forms.gle/PbX5hcjJewwExd1r7"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+\newpage
+
+## Data:
+
+We will be exploring an edited version of the Pokemon Dataset by Rounak Banik, available at https://www.kaggle.com/datasets/rounakbanik/pokemon/. This version of the dataset includes the following information:
+
+**name**: The English name of the Pokemon
+
+**is_legendary**: A binary variable denoting if the Pokemon is legendary
+
+**generation**: The numbered generation which the Pokemon was first introduced
+
+**type1**: The Primary Type of the Pokemon
+
+**type2**: The Secondary Type of the Pokemon
+
+**capture_rate**: Capture Rate of the Pokemon as an integer out of 1000
+
+**hp**: The Base HP of the Pokemon
+
+**attack**: The Base Attack of the Pokemon
+
+**defense**: The Base Defense of the Pokemon
+
+**speed**: The Base Speed of the Pokemon
+
+**sp_attack**: The Base Special Attack of the Pokemon
+
+**sp_defense**: The Base Special Defense of the Pokemon
+
+**height_m**: Height of the Pokemon in metres
+
+**weight_kg**: The Weight of the Pokemon in kilograms
+
+**base_egg_steps**: The number of steps required to hatch an egg of the Pokemon
+
+**experience_growth**: The Experience Growth of the Pokemon
+
+**base_happiness**: Base Happiness of the Pokemon
+
+**value**: How many PokeDollars each pokemon is worth 
+
+\newpage
+## Question 1: Data Exploration
+
+### Question 1.1: Create an appropriate visualization of each continuous distribution in this dataset
+
+
+```{r q1a}
+library(tidyverse)
+library(GGally)
+
+seed <- 13
+legend_value <- rnorm(1,500 ,200)
+english_numbers <- c("one", "two", "three", "four", "five", "six", "seven", "eight")
+
+
+data <- read_csv("/home/sam/Downloads/pokemon.csv") %>%
+  select(name, is_legendary, generation, type1, type2, capture_rate,
+         hp, attack, defense, speed, sp_attack, sp_defense,
+         height_m, weight_kg, base_egg_steps, 
+         experience_growth, base_happiness) %>%
+  mutate(generation = english_numbers[generation],
+         generation = factor(generation),
+         type2 = case_when(is.na(type2) ~ type1,
+                           T ~ type2),
+         type1 = factor(type1),
+         type2 = factor(type2),
+         capture_rate = as.numeric(capture_rate),
+         capture_rate = case_when(is.na(capture_rate)~0,
+                                  T~capture_rate),
+         hp = as.numeric(hp),
+         attack = as.numeric(attack),
+         defense = as.numeric(defense),
+         speed = as.numeric(speed),
+         sp_attack = as.numeric(sp_attack),
+         sp_defense = as.numeric(sp_defense),
+         height_m = as.numeric(height_m),
+         weight_kg = as.numeric(weight_kg),
+         base_egg_steps = as.numeric(base_egg_steps),
+         experience_growth = as.numeric(experience_growth),
+         base_happiness = as.numeric(base_happiness),
+         value = legend_value*is_legendary + 5*hp + 2*speed + 7*attack + 3*defense + 6*sp_attack + 2*sp_defense - 11*capture_rate + rnorm(1,0 ,5),
+         value = value + abs(min(value)),
+         base_happiness = case_when(name == "Pikachu" ~ 141,
+                                    T ~ base_happiness)
+  ) %>%
+  drop_na()
+
+path1 <- paste0('/home/sam/Regis/PSY423/Exam2Data/Exam2Data_',seed,'.csv')
+
+## Question 1
+data_continuous <- data %>% select_if(is.numeric)
+
+# Now use ggpairs on the continuous data
+ggpairs(data_continuous)
+
+```
+
+
+### Question 1.2: Which variable is most obviously normally distributed?
+
+Attack
+
+### Question 1.3: Which variable is best described as tetramodal?
+
+experience_growth
+
+## Question 1.3: For the distributions that are not obviously normally distributed and have only one major peak, how would you describe their skew?
+
+Right-Skewed
+
+### 1.4: What is the mean value of all pokemon?
+```{r q14}
+q <- mean(data$value)
+
+print(paste0("Mean = ", round(q,3)))
+```
+
+### 1.5: What is the standard deviation of all pokemon's attack?
+```{r q15}
+q <- sd(data$attack)
+
+print(paste0("Sd = ", round(q,3)))
+```
+
+### 1.6: What is the mean of all pokemon's hp minus their defense?
+```{r q16}
+q <- mean(data$hp - data$defense)
+
+print(paste0("Mean HP - Defense = ", round(q,3)))
+```
+
+### 1.7: What is the average of all pokemon's sp_attack normalized by their sp_defense?
+```{r q17}
+q <- mean(data$sp_attack - data$sp_defense)
+
+print(paste0("Mean sp_Attack - SP_Defense = ", round(q,3)))
+```
+
+### 1.8: What is the most valuable pokemon and it's cost?
+```{r q18}
+q <- data %>%
+  mutate(mostval = value == max(value)) %>%
+  filter(mostval == 1) 
+
+print(paste0("The most valuable pokemon is ", q$name, " valued at ", round(q$value,3)))
+```
+
+### 1.9: What is the least valuable pokemon and it's cost?
+
+```{r q19}
+q <- data %>%
+  mutate(leastval = value == min(value)) %>%
+  filter(leastval == 1) 
+
+print(paste0("The least valuable pokemon is ", q$name, " valued at ", round(q$value,3)))
+```
+
+### 1.10: What is the happiest pokemon and it's z-score for happiness assuming the population standard deviation for happiness is 25?
+```{r q110}
+q <- data %>%
+  mutate(z = base_happiness - mean(base_happiness),
+         z = z/25,
+         happiest = z == max(z)) %>%
+  filter(happiest == 1) 
+
+print(paste0("The happiest pokemon is ", q$name, " with a z-score= ", round(q$z,3)))
+```
+
+
+\newpage
+## Question 2: T-tests
+
+Professor Oak is offering you a job as an assistant, but is fresh out of field research jobs so you are stuck in the lab with him. During your first day Oak claimed that the average number of steps to hatch a Pokemon egg is 7663, because upside down this number says "Egg" followed by the math symbol for reciprocal values. Since he's the boss it's up to you to verify this. 
+
+
+### Question 2.1: What is the null hypothesis
+
+$$H_0: \bar{x}_{steps} = 7663$$
+
+### Question 2.2: What is the t-score for this hypothesis test?
+
+```{r q22}
+q <- t.test(data$base_egg_steps, mu=7663)
+t <- round(q$statistic,3)
+print(paste0("t = ", t))
+```
+
+
+### Question 2.3: What is the p-value?
+
+```{r q23}
+p <- round(q$p.value,3)
+print(paste0("p = ", p))
+```
+
+### Question 2.4: How many degrees of freedom did this t-distribution have?
+```{r q24}
+df <- nrow(data) - 1
+print(paste0("p = ", df))
+```
+
+### Question 2.5: Given an alpha threshold of 0.05, state the conclusion using APA format.
+
+Amazingly Proffessor Oak's upside egg idea works as a null hypothesis! We fail to reject the null hypothesis with t(`r df`) = `r t`, p=`r p`.
+
+\newpage
+## Question 3: ANOVA
+
+Proffessor Oak has been musing with the idea that Generation 1 pokemon are the best and thinks value on the black market might be a good statistic to judge this by. 
+
+### Question 3.1: What is the null hypothesis
+
+$$H_0: \text{All generations have the same value}$$
+### Question 3.2: What is the f-score for this hypothesis test?
+
+```{r q32}
+gen_aov <- aov(value ~ generation, data = data)
+q <- summary(gen_aov)
+f <- round(q[[1]][['F value']][1],3)
+print(paste0("F = ", f))
+```
+
+
+### Question 3.3: What is the p-value?
+
+```{r q33}
+p <- round(q[[1]][['Pr(>F)']][1],3)
+print(paste0("p = ", p))
+```
+
+### Question 3.4: What pair of generations, if any, are most signifigantly different?
+```{r q34}
+ph <- data.frame(TukeyHSD(gen_aov)[1])
+
+sig_ph <- ph %>%
+  mutate(p_min = generation.p.adj==min(generation.p.adj)) %>%
+  filter(p_min == 1) %>%
+  rownames_to_column("name") %>%
+  pull(name)
+print(paste0("The signifigantly different pair is ", sig_ph))
+
+df1 <- q[[1]][['Df']][1]
+df2 <- q[[1]][['Df']][2]
+```
+
+ 
+### Question 3.5: Given an alpha threshold of 0.05, state the conclusion using APA format.
+
+Given the null hypothesis that there is no difference between the generations in terms of value, we reject the null hypothesis with F(`r df1`, `r df2`) = `r f`, p= `r p`. However, unlike Oak's prediction `r sig_ph` are generation the generations with greatest significant difference based on Tukey's HSD. 
+
+\newpage
+## Question 4: 2-Factor ANOVA
+
+Proffessor Oak hypothesizes that both the generation of a Pokémon and its primary type (type1) influence its capture rate. He believes that some combinations of generation and type may result in different capture rates.
+
+### Question 4.1: What is the null hypothesis?
+
+There is no interaction effect between Pokémon generation and type1 on the capture rate.
+
+There is no main effect of Pokémon generation on the capture rate.
+
+There is no main effect of Pokémon type1 on the capture rate.
+
+### Question 4.2: What are the F-scores for the main effects and the interaction?
+
+```{r q42}
+gen_type_aov <- aov(capture_rate ~ generation * type1, data = data)
+summary_aov <- summary(gen_type_aov)
+f_gen <- round(summary_aov[[1]][["F value"]][1], 3)
+f_type1 <- round(summary_aov[[1]]["type1", "F value"], 3)
+f_interaction <- round(summary_aov[[1]]["generation:type1", "F value"], 3)
+
+cat("F-score for generation main effect: ", f_gen, "\n")
+cat("F-score for type1 main effect: ", f_type1, "\n")
+cat("F-score for generation:type1 interaction effect: ", f_interaction, "\n")
+```
+
+
+### Question 4.3: What are the p-values for the main effects and the interaction?
+
+```{r q43}
+p_gen <- round(summary_aov[[1]][["Pr(>F)"]][1], 3)
+p_type1 <- round(summary_aov[[1]]["type1", "Pr(>F)"], 3)
+p_interaction <- round(summary_aov[[1]]["generation:type1", "Pr(>F)"], 3)
+
+cat("p-value for generation main effect: ", p_gen, "\n")
+cat("p-value for type1 main effect: ", p_type1, "\n")
+cat("p-value for generation:type1 interaction effect: ", p_interaction, "\n")
+
+df1 <- summary_aov[[1]][['Df']][1]
+df2 <- summary_aov[[1]][['Df']][2]
+df3 <- summary_aov[[1]][['Df']][3]
+
+```
+
+
+### Question 4.4: Given an alpha threshold of 0.05, state the conclusion using APA format.
+
+An investigation into the effects of Pokémon generation and type on capture rate was conducted using a two-factor ANOVA. The results indicated a significant main effect of Pokémon generation, F(`r df1`, `r df-df1+1`) = `r f_gen`, p = `r p_gen`. Additionally, a significant main effect of Pokémon type1 was found, F(`r df2`, `r df-df2+1`) = `r f_type1`, p = `r p_type1`. The interaction effect between generation and type1 was also significant, F(`r df3`, `r df-df3+1`) = `r f_interaction`, p = `r p_interaction`.
+
+
+
+\newpage
+## Question 5: Regression
+
+Professor Oak has devised a scheme to calculate the value of a Pokémon based on several of its characteristics. He would like you to verify his model through regression analysis.
+
+### Question 5.1: Simple Linear Regression
+
+Conduct a simple linear regression to examine the relationship between a Pokémon's capture rate and its value, and create a scatter plot with the regression line. 
+
+```{r p51}
+simple_lm <- lm(value ~ capture_rate, data = data)
+slm <- summary(simple_lm)
+
+ggplot(data, aes(x = capture_rate, y = value)) +
+  geom_point() +
+  geom_smooth(method = 'lm')
+```
+
+### Question 5.2: What are the model's parameter's? 
+
+Value = `r round(slm$coefficients[1],3)` + `r round(slm$coefficients[2],3)`*CaptureRate
+
+### Question 5.3: What is the model's R-squared?
+
+$R^2 =$ `r round(slm$adj.r.squared,3)`
+
+
+### Question 5.4:  Multiple Linear Regression
+
+Develop multiple linear regression model with at least three predictors. In your experiments what predictors did you find to be the three with the largest magnitude effect on the prediction and what are their vales?
+
+```{r q54}
+# Multiple linear regression with all possible predictors
+partial_model <- lm(value ~  is_legendary + attack + capture_rate, data = data)
+
+summary(partial_model)
+
+# full_model <- lm(value ~ is_legendary + hp + speed + attack + defense + sp_attack + sp_defense + capture_rate, data = data)
+# 
+# summary(full_model)
+
+```
+
+
+### Question 5.5
+
+State the practical conclusion of your model, what does it say about how people in the pokemon market value pokemon?
+
+
+
