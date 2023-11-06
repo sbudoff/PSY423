@@ -1,0 +1,1310 @@
+---
+title: "PSY 423 Course Review"
+author: "S. Budoff"
+date: "2023-11-06"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+```{r load}
+library(tidyverse)
+library(googlesheets4)
+library(patchwork)
+library(qrcode)
+
+gs4_auth(email = "sabudoff@gmail.com")
+
+#Sort the integer values
+coffee_levels <- c("Love it!", "It's good", "No opinion", "It's bad", "Ewwww!")
+shoe_levels <- c("M 0-4.5 / W 0-6",
+                 "M 5-6 / W 6.5-7.5",
+                 "M 6.5-7.5 / W 8-9",
+                 "M 8-9 / W 9.5-10.5",
+                 "M 9.5-10.5 / W 11-12",
+                 "M 11-12 / W 12.5-13.5",
+                 "M 12.5+ / W14+")
+
+url = "https://docs.google.com/spreadsheets/d/18Vj9uuD51ZHRds2Jqve91Cii_x46lJJl5ErrEwb4tKs/edit#gid=976217741"
+df <- read_sheet(url, sheet = "Form Responses 1")
+df <- df %>%
+  mutate(Shoe_Size = factor(`What size shoe do you wear?`, levels=shoe_levels),
+         HairColor = factor(`What color is your hair right now?`),
+         Height = `How tall are you (in inches)?`,
+         Coffee = factor(`How much do you like coffee?`, levels=coffee_levels)) %>%
+  select(Shoe_Size, HairColor, Height, Coffee)
+```
+
+## Warmup Quiz
+
+```{r qr}
+code_link <- "https://forms.gle/7KU2odHpq1QqdPKGA"
+plot(qr_code(code_link))
+print(code_link)
+```
+
+## Underlying All Stats Are Distributions
+
+```{r plot7}
+# Parameters for left-skewed beta distribution
+alpha_left <- 5
+beta_left <- 2
+
+# Parameters for uniform distribution
+alpha_c <- 1
+beta_c <- 1
+
+# Parameters for right-skewed beta distribution
+alpha_right <- 2
+beta_right <- 5
+
+# Generate x-values for plotting
+x_values <- seq(0, 1, by = 0.01)
+
+# Calculate PDF values for left-skewed beta distribution
+pdf_left <- dbeta(x_values, alpha_left, beta_left)
+
+# Calculate PDF values for uniform beta distribution
+pdf_c <- dbeta(x_values, alpha_c, beta_c)
+
+# Calculate PDF values for right-skewed beta distribution
+pdf_right <- dbeta(x_values, alpha_right, beta_right)
+
+pdf_norm <- dnorm(x_values, 0.5, 0.2)
+
+# Create data frame
+data <- data.frame(
+  Distribution = rep(c("Left Skewed", "Uniform", "Right Skewed", "Normal"), each = length(x_values)),
+  x = rep(x_values, times = 4),
+  PDF = c(pdf_left, pdf_c, pdf_right, pdf_norm)
+)
+
+# Create a side-by-side density plot using facet_wrap
+ggplot(data, aes(x = x, y = PDF, group = Distribution, color = Distribution)) +
+  geom_line() +
+  labs(x = "x", y = "PDF", title = "Different Distributions") +
+  theme_minimal() +
+  scale_color_manual(values = c("blue","green",  "red", "purple"))  +
+  facet_wrap(~ Distribution, ncol = 2, scales = "free") 
+```
+
+## The Central Limit Theorem:
+
+Given Random and Independent Samples of Observations, the **Sample Distribution**'s mean approaches normality as the size of the sample (denoted N) increases
+
+This is true regardless of the shape of the **Population Distribution**
+
+
+## Special features of a Normal Curve:
+
+1) Bell Shaped
+
+2) Symmetrical
+
+3) Unimodal
+
+4) With sufficiently large samples, we can **assume** most data will converge on a Normal
+
+## Normal Distributions can come from the Central Limit Theorem
+
+```{r plot1}
+
+plot_histdens <- function(df) {
+  hist <- ggplot(df, aes(x = Height)) +
+  geom_histogram()+
+  theme_minimal() +
+  ggtitle("Histogram of Heights")
+
+dens <- ggplot(df, aes(x = Height)) +
+  geom_density(fill = 'blue', alpha = 0.8) +
+  theme_minimal() +
+  ggtitle("Density of Heights")
+
+hist + dens
+}
+
+plot_histdens(df)
+
+```
+
+## Let's Imagine we sampled 10 times more students
+
+```{r plot2}
+
+x_bar <- mean(df$Height)
+s <- sd(df$Height)
+
+sim10 <- data.frame(Height = rnorm(100, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+
+plot_histdens(sim10)
+
+```
+
+
+## Ok what about with 100 times more students (1000)
+
+```{r plot3}
+sim10 <- data.frame(Height = rnorm(1000, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+plot_histdens(sim10)
+
+```
+
+## 10000 samples?
+
+```{r plot4}
+sim10 <- data.frame(Height = rnorm(10000, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+plot_histdens(sim10)
+
+```
+
+## By 100000 samples we are converging on the Central Limit Theorem based on the laws of large numbers 
+
+```{r plot5}
+sim10 <- data.frame(Height = rnorm(100000, mean = x_bar, sd = s) ) %>%
+  rbind(df$Height)
+  
+sim_hist <- plot_histdens(sim10)
+
+sim_hist
+```
+
+## Normal Distributions can come from the Central Limit Theorem
+
+```{r plot6}
+# Generate a sequence of x-values
+x <- seq(-5, 5, by = 0.01)
+
+# Calculate the normal PDF values for the x-values
+pdf_values <- dnorm(x, mean = 0, sd = 2)
+
+# Plot the normal PDF
+plot(x, pdf_values, type = "l", lwd = 2, col = "blue", 
+     xlab = "x", ylab = "Probability", main = "Normal Probability Density Function")
+```
+
+
+## Focus on skewness
+
+```{r plot8}
+# Create a side-by-side density plot using facet_wrap
+data %>%
+  filter(Distribution %in% c("Left Skewed", "Right Skewed")) %>%
+  ggplot(aes(x = x, y = PDF, group = Distribution, color = Distribution)) +
+    geom_line() +
+    labs(x = "x", y = "PDF", title = "Different Distributions") +
+    theme_minimal() +
+    facet_wrap(~ Distribution, ncol = 2, scales = "free") +
+    scale_color_manual(values = c("blue",  "red")) 
+```
+
+
+## Measures of Central Tendency
+1) Mean
+2) Median
+3) Mode
+
+## Visualizing Measures of Central Tendency
+
+```{r plot9}
+# Calculate mean and mode
+mean_value <- mean(df$Height)
+median_value <- median(df$Height)
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+mode_value <- getmode(df$Height)
+
+# Create the plot with mean and mode lines
+box <- ggplot(df, aes(y = Height)) +
+  geom_boxplot() +
+  geom_hline(yintercept = median_value, color = "black", linetype = "dashed") +
+  geom_hline(yintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_hline(yintercept = mode_value, color = "blue", linetype = "dashed") +
+  labs(y = "Height", title = "Boxplot with Mean and Mode") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+hist <- ggplot(df, aes(x = Height)) +
+  geom_histogram()+
+  geom_vline(xintercept = median_value, color = "black", linetype = "dashed") +
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = mode_value, color = "blue", linetype = "dashed") +
+  theme_minimal() +
+  ggtitle("Histogram of Heights")
+hist + box
+```
+
+## Modality
+
+"The" mode can be a set of values!
+
+```{r plot10}
+# Number of data points
+n <- 1000
+
+# Generate data for unimodal distribution
+unimodal_data <- rnorm(n+1, mean = 0, sd = 1)
+
+# Generate data for bimodal distribution
+bimodal_data <- c(rnorm(n / 2, mean = -2, sd = 0.5), rnorm(n / 2, mean = 2, sd = 0.5))
+
+# Generate data for trimodal distribution
+trimodal_data <- c(rnorm(n / 3, mean = -3, sd = 0.5),
+                   rnorm(n / 3, mean = 0, sd = 0.5),
+                   rnorm(n / 3, mean = 3, sd = 0.5))
+
+# Create data frame for plotting
+df <- data.frame(
+  Distribution = rep(c("1 Peak = Unimodal", "2 Peaks =Bimodal", "3+ Peaks = Trimodal or Multimodal"), each = n),
+  Values = c(unimodal_data, bimodal_data, trimodal_data)
+)
+
+# Create a set of density plots using facet_wrap
+ggplot(df, aes(x = Values, fill = Distribution)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Values", y = "Density", title = "Distributions: Unimodal, Bimodal, Trimodal") +
+  theme_minimal() +
+  theme(legend.position = 'None') +
+  facet_wrap(~ Distribution, ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = c("blue", "green", "purple")) +
+  guides(fill = guide_legend(title = "Distribution"))
+```
+
+
+## Variablity
+
+How spread out our data is
+
+```{r plot11}
+# Number of data points
+n <- 1000
+
+# Generate data for unimodal distribution
+tight_data <- rnorm(n, mean = 0, sd = 0.5)
+
+# Generate data for bimodal distribution
+spread_data <- rnorm(n, mean = 0, sd = 1)
+
+# Generate data for trimodal distribution
+very_data <- rnorm(n, mean = 0, sd = 2)
+
+# Create data frame for plotting
+df <- data.frame(
+  Distribution = rep(c("SD = 0.5", "SD = 1.0", "SD = 2.0"), each = n),
+  Values = c(tight_data, spread_data, very_data)
+)
+
+# Create a set of density plots using facet_wrap
+ggplot(df, aes(x = Values, fill = Distribution)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Values", y = "Density", title = "Distributions With Different Variance") +
+  theme_minimal() +
+  scale_fill_manual(values = c("blue", "green", "purple")) +
+  guides(fill = guide_legend(title = "Distribution"))
+```
+
+## Measures of Variability
+
+1) Range = Maximum - Minimum
+
+2) Standard Deviation = How far apart numbers are (their difference from the mean) in a dataset
+
+3) Variance = The average difference each value has from the mean **squared**
+
+
+
+## Confidence Intervals
+
+A set/interval of numbers that contain the parameter we care about a specified percent of time
+
+Usually 95%
+
+If the parameter we care about is the mean, in frequentist statistics it is the interval we predict to contain the sample mean for 95 out of 100 experiments we conduct
+
+
+## How do you think sample size will relate to confidence intervals?
+
+```{r std}
+# Create a data frame with different sample sizes
+sample_sizes <- seq(2, 200, by = 10)
+data <- data.frame(sample_size = sample_sizes)
+
+# Generate means and standard errors for each sample size
+data$mean <- sapply(sample_sizes, function(n) {
+  x <- rnorm(n)  # Generate random data
+  mean(x)
+})
+
+data$std_error <- sapply(sample_sizes, function(n) {
+  x <- rnorm(n)  # Generate random data
+  sd(x) / sqrt(n)  # Calculate standard error
+})
+
+# Create a plot
+ggplot(data, aes(x = sample_size, y = mean, ymin = mean - 1.96 * std_error, ymax = mean + 1.96 * std_error)) +
+  geom_point() +
+  geom_errorbar(width = 0.2) +
+  labs(
+    x = "Sample Size",
+    y = "Mean",
+    title = "Effect of Sample Size on Confidence Interval Width"
+  ) +
+  theme_minimal()
+```
+
+## N's effect on CIs come from the standard error of the mean
+
+Increasing the sample size decreases the width of confidence intervals, because it decreases the standard error.
+
+Standard error (SE or SEM or $\sigma_{\bar{x}}$) of estimate is a statistic of the stability and reliability of data. It is the variability across MULTIPLE samples
+
+Standard error is used to estimate the population standard deviation, which is the variability across a population, or in the case of a sample standard deviation across a SINGLE sample.
+
+standard error:
+$$\sigma_{\bar{x}} = \frac{s}{\sqrt{n}}$$
+
+## How is the 95% CI computed
+
+$$CI = 1.96 * \sigma_{\bar{x}} = 1.96 *\frac{s}{\sqrt{n}}$$
+
+Where does 1.96 come from?
+
+
+
+
+## Standardization
+
+Sometimes we want to compare values that come from different distributions 
+
+To compare apples with apples, we must standardize them
+
+We can do this by **Transforming** each distribution such that both have a mean = 0 and standard deviation = 1
+
+This is called a standard normal, or Z-distribution
+
+## The Z-distribution of our Height Simulation
+
+```{r zplot1}
+test_dists <- data.frame(Physics = rnorm(29, mean = 95, sd = 1),
+                         French = rnorm(29, mean = 70, sd = 3)) %>%
+  rbind(data.frame(Physics = 94, French = 80)) %>%
+  mutate(Physics.Z = (Physics-mean(Physics))/sd(Physics),
+         French.Z = (French-mean(French))/sd(French))
+
+test_dists %>%
+  select(-Physics.Z, -French.Z) %>%
+  gather("Test", "Raw Score") %>%
+  ggplot(aes(x = `Raw Score`, fill = Test)) +
+  geom_histogram() +
+  facet_wrap(~Test) +
+  theme_minimal()
+
+```
+
+
+## Data Distributions
+
+```{r zplot2}
+test_dists <- data.frame(Physics = rnorm(29, mean = 95, sd = 1),
+                         French = rnorm(29, mean = 70, sd = 3)) %>%
+  rbind(data.frame(Physics = 94, French = 80)) %>%
+  mutate(Physics.Z = (Physics-mean(Physics))/sd(Physics),
+         French.Z = (French-mean(French))/sd(French))
+
+test_dists %>%
+  select(-Physics.Z, -French.Z) %>%
+  gather("Test", "Raw Score") %>%
+  ggplot(aes(x = `Raw Score`)) +
+  geom_density(aes(fill = Test), adjust = 1.5) +  # Add density plots with different colors
+  facet_wrap(~Test) +
+  theme_minimal()
+
+```
+
+
+## Z-Distributions
+
+```{r zplot3}
+test_dists <- data.frame(French = rnorm(29, mean = 70, sd = 3),
+                         Physics = rnorm(29, mean = 95, sd = 1)
+                         ) %>%
+  rbind(data.frame(French = 80, Physics = 94)) %>%
+  mutate(French.Z = (French-mean(French))/sd(French),
+         Physics.Z = (Physics-mean(Physics))/sd(Physics))
+
+test_dists %>%
+  select(-Physics, -French) %>%
+  gather("Test", "Z Score") %>%
+  ggplot(aes(x = `Z Score`)) +
+  geom_density(aes(fill = Test), adjust = 1.5) +  # Add density plots with different colors
+  facet_wrap(~Test) +
+  theme_minimal()
+
+print(test_dists[30,])
+```
+
+
+## Hypothesis Testing
+
+A hypothesis is a guess, but in frequentist statistics we have a special way of framing it
+
+Specifically we must remember we CAN NOT prove anything, we can only disprove something
+
+Thus we must frame our hypothesis accordingly
+
+
+## Statistical Signifigance
+
+This is our decision point where we decide if we reject our null hypothesis or not
+
+Basically it asks if two values/distributions are "different enough"
+
+Said differently, how confident are we in our decision?
+
+
+## $\alpha = 0.05$
+
+This is the typical threshold for a significant p-value 
+
+```{r curve}
+
+# Generate data points for the normal distribution
+x <- seq(-10, 10, length.out = 1000)
+y <- dnorm(x)
+
+sigmas <- seq(-5,5)
+cum_prob <- c()
+for (i in 2:length(sigmas)) {
+  cum_prob <- c(cum_prob, diff(pnorm(c(sigmas[i-1],sigmas[i]))))
+}
+
+sigmas = c(seq(-5,-1), seq(1,5))
+sigmas_df <- data.frame("sigma" = sigmas, "Prob" = cum_prob, "y" = c(0.1, 0.2,0.3, 0.4, 0.45, 0.5, 0.4, 0.3, 0.2, 0.1)) %>%
+  mutate(Prob = sprintf("σ = %.0f => %.1e",sigmas, Prob))
+
+# Create a data frame for plotting
+data <- data.frame(x = x, y = y)
+
+rainbow_norm <- ggplot(data, aes(x = x, y = y)) +
+  geom_line() +
+  geom_ribbon(data = data[data$x < 1, ], aes(x = x, ymin = 0, ymax = y), fill = "red", alpha = 1) +
+  geom_ribbon(data = data[data$x < -1, ], aes(x = x, ymin = 0, ymax = y), fill = "orange", alpha = 1) +
+  geom_ribbon(data = data[data$x < -2, ], aes(x = x, ymin = 0, ymax = y), fill = "yellow", alpha = 1) +
+  geom_ribbon(data = data[data$x < -3, ], aes(x = x, ymin = 0, ymax = y), fill = "green", alpha = 1) +
+  geom_ribbon(data = data[data$x < -4, ], aes(x = x, ymin = 0, ymax = y), fill = "blue", alpha = 1) +
+  geom_ribbon(data = data[data$x < -5, ], aes(x = x, ymin = 0, ymax = y), fill = "purple", alpha = 1) +
+  geom_ribbon(data = data[data$x >= 1, ], aes(x = x, ymin = 0, ymax = y), fill = "orange", alpha = 1) +
+  geom_ribbon(data = data[data$x > 2, ], aes(x = x, ymin = 0, ymax = y), fill = "yellow", alpha = 1) +
+  geom_ribbon(data = data[data$x > 3, ], aes(x = x, ymin = 0, ymax = y), fill = "green", alpha = 1) +
+  geom_ribbon(data = data[data$x > 4, ], aes(x = x, ymin = 0, ymax = y), fill = "blue", alpha = 1) +
+  geom_ribbon(data = data[data$x > 5, ], aes(x = x, ymin = 0, ymax = y), fill = "purple", alpha = 1) +
+  geom_text(data=sigmas_df, aes(x=sigma, y = y, label=Prob)) +
+  theme_minimal()
+
+rainbow_norm
+
+```
+
+## p-values
+
+The formal name for what we compute is the p-value, it is the probability your samples came from the same distribution and **differences occurred by chance**
+
+This is also the risk that you will make a **Type I Error**, that is you incorrectly reject a true null hypothesis
+
+If you are hoping to reject a null hypothesis do you want this value to be high or low?
+
+## Calculating p-values
+
+Simply the sum of the probability of what we observed, the probability of every other event that is as rare AND every event that is rarer
+
+## Important Terminology
+
+Practice saying these hypotheses in words $$H_0 : \mu_1 = \mu_2$$ $$H_a : \mu_1 \neq \mu_2$$ $p < \alpha$ : "Reject the null hypothesis"
+
+$p >= \alpha$ : "Fail to reject the null hypothesis"
+
+Type I error ($\alpha$) - The probability of rejecting a null hypothesis that should NOT be rejected, aka: a false positive
+
+## Low p-values tell you if you are dealing with different distributions, but not how different, this is what Effect Size is for!
+
+
+## Effect Size - Cohen's d
+
+What fraction of the pooled variability observed is the difference between the means?
+
+$$d = \frac{\mu_1 - \mu_2}{\sqrt{\frac{\sigma_1^2 + \sigma_2^2}{2}}}$$
+
+
+
+## Small Effect Size
+
+```{r small}
+
+# Desired overlap percentage (e.g., 85%)
+desired_overlap_percentage <- 0.85
+
+# Fixed parameters for the second distribution
+mean2 <- 2
+sd2 <- 1
+
+# Function to calculate overlap percentage given mean and sd of the first distribution
+calculate_overlap_percentage <- function(mean1, sd1) {
+  # Calculate the overlap by integrating the smaller PDF over the overlap range
+  overlap <- integrate(function(x) pmin(dnorm(x, mean = mean1, sd = sd1), dnorm(x, mean = mean2, sd = sd2)),
+                      lower = -Inf, upper = Inf)$value
+  # Return the overlap percentage
+  return(overlap)
+}
+
+# Use an iterative approach to find the mean and sd of the first distribution
+# that achieves the desired overlap percentage
+tolerance <- 0.001  # Tolerance for convergence
+initial_guess_mean1 <- 0
+initial_guess_sd1 <- 1
+mean1 <- initial_guess_mean1
+sd1 <- initial_guess_sd1
+
+while (abs(desired_overlap_percentage - calculate_overlap_percentage(mean1, sd1)) > tolerance) {
+  if (calculate_overlap_percentage(mean1, sd1) < desired_overlap_percentage) {
+    # If the calculated overlap is less than desired, increase the mean
+    mean1 <- mean1 + 0.01
+  } else {
+    # If the calculated overlap is greater than desired, decrease the standard deviation
+    sd1 <- sd1 - 0.01
+  }
+}
+# Calculate the low and high values for the shaded region based on desired overlap
+overlap_range <- qnorm(c((1 - desired_overlap_percentage) / 2, 1 - (1 - desired_overlap_percentage) / 2), 
+                       mean = mean1, sd = sd1)
+
+# Generate x values for the range of the distributions
+x <- seq(min(overlap_range)-3, max(overlap_range)+3, by = 0.01)
+
+# Compute the density values for the two distributions
+density1 <- dnorm(x, mean = mean1, sd = sd1)
+density2 <- dnorm(x, mean = mean2, sd = sd2)
+
+# Create a data frame for ggplot
+df <- data.frame(x = x, density1 = density1, density2 = density2)
+
+# Create the ggplot object
+ggplot(df, aes(x = x)) +
+  
+  # Add the first density curve
+  geom_line(aes(y = density1), color = "blue", size = 1) +
+  
+  # Add the second density curve
+  geom_line(aes(y = density2), color = "red", size = 1) +
+  
+  # Add shaded region
+  # geom_ribbon(data = subset(df, x >= min(overlap_range) & x <= max(overlap_range)), 
+  #             aes(ymin = 0, ymax = pmin(density1, density2)[x >= min(overlap_range) & x <= max(overlap_range)]), 
+  #             fill = "gray", alpha = 0.5) +
+  
+  # Customize labels and title
+  labs(
+    y = "Density",
+    title = "Small effect size"
+  ) +
+  theme_minimal()
+
+# Define the PDF functions for the two normal distributions
+pdf1 <- function(x) dnorm(x, mean = mean1, sd = sd1)
+pdf2 <- function(x) dnorm(x, mean = mean2, sd = sd2)
+
+
+# Calculate the overlap by integrating the smaller PDF over the overlap range
+overlap <- integrate(function(x) pmin(pdf1(x), pdf2(x)), lower = overlap_range[1]-3, upper = overlap_range[2]+3)
+
+# Print the result
+cat("Overlap between the two PDFs:", overlap$value, "\n")
+```
+
+## Medium Effect Size
+
+```{r Medium}
+
+# Desired overlap percentage (e.g., 85%)
+desired_overlap_percentage <- 0.67
+
+# Fixed parameters for the second distribution
+mean2 <- 2
+sd2 <- 1
+
+# Function to calculate overlap percentage given mean and sd of the first distribution
+calculate_overlap_percentage <- function(mean1, sd1) {
+  # Calculate the overlap by integrating the smaller PDF over the overlap range
+  overlap <- integrate(function(x) pmin(dnorm(x, mean = mean1, sd = sd1), dnorm(x, mean = mean2, sd = sd2)),
+                      lower = -Inf, upper = Inf)$value
+  # Return the overlap percentage
+  return(overlap)
+}
+
+# Use an iterative approach to find the mean and sd of the first distribution
+# that achieves the desired overlap percentage
+tolerance <- 0.001  # Tolerance for convergence
+initial_guess_mean1 <- 0
+initial_guess_sd1 <- 1
+mean1 <- initial_guess_mean1
+sd1 <- initial_guess_sd1
+
+while (abs(desired_overlap_percentage - calculate_overlap_percentage(mean1, sd1)) > tolerance) {
+  if (calculate_overlap_percentage(mean1, sd1) < desired_overlap_percentage) {
+    # If the calculated overlap is less than desired, increase the mean
+    mean1 <- mean1 + 0.01
+  } else {
+    # If the calculated overlap is greater than desired, decrease the standard deviation
+    sd1 <- sd1 - 0.01
+  }
+}
+# Calculate the low and high values for the shaded region based on desired overlap
+overlap_range <- qnorm(c((1 - desired_overlap_percentage) / 2, 1 - (1 - desired_overlap_percentage) / 2), 
+                       mean = mean1, sd = sd1)
+
+# Generate x values for the range of the distributions
+x <- seq(min(overlap_range)-3, max(overlap_range)+3, by = 0.01)
+
+# Compute the density values for the two distributions
+density1 <- dnorm(x, mean = mean1, sd = sd1)
+density2 <- dnorm(x, mean = mean2, sd = sd2)
+
+# Create a data frame for ggplot
+df <- data.frame(x = x, density1 = density1, density2 = density2)
+
+# Create the ggplot object
+ggplot(df, aes(x = x)) +
+  
+  # Add the first density curve
+  geom_line(aes(y = density1), color = "blue", size = 1) +
+  
+  # Add the second density curve
+  geom_line(aes(y = density2), color = "red", size = 1) +
+  
+  # Add shaded region
+  # geom_ribbon(data = subset(df, x >= min(overlap_range) & x <= max(overlap_range)), 
+  #             aes(ymin = 0, ymax = pmin(density1, density2)[x >= min(overlap_range) & x <= max(overlap_range)]), 
+  #             fill = "gray", alpha = 0.5) +
+  
+  # Customize labels and title
+  labs(
+    y = "Density",
+    title = "Medium effect size"
+  ) +
+  theme_minimal()
+
+# Define the PDF functions for the two normal distributions
+pdf1 <- function(x) dnorm(x, mean = mean1, sd = sd1)
+pdf2 <- function(x) dnorm(x, mean = mean2, sd = sd2)
+
+
+# Calculate the overlap by integrating the smaller PDF over the overlap range
+overlap <- integrate(function(x) pmin(pdf1(x), pdf2(x)), lower = overlap_range[1]-3, upper = overlap_range[2]+3)
+
+# Print the result
+cat("Overlap between the two PDFs:", overlap$value, "\n")
+```
+
+## Large Effect Size
+
+```{r Large}
+
+# Desired overlap percentage (e.g., 85%)
+desired_overlap_percentage <- 0.85
+
+# Fixed parameters for the second distribution
+mean2 <- 2
+sd2 <- 1
+
+# Function to calculate overlap percentage given mean and sd of the first distribution
+calculate_overlap_percentage <- function(mean1, sd1) {
+  # Calculate the overlap by integrating the smaller PDF over the overlap range
+  overlap <- integrate(function(x) pmin(dnorm(x, mean = mean1, sd = sd1), dnorm(x, mean = mean2, sd = sd2)),
+                      lower = -Inf, upper = Inf)$value
+  # Return the overlap percentage
+  return(overlap)
+}
+
+# Use an iterative approach to find the mean and sd of the first distribution
+# that achieves the desired overlap percentage
+tolerance <- 0.001  # Tolerance for convergence
+initial_guess_mean1 <- 0
+initial_guess_sd1 <- 1
+mean1 <- initial_guess_mean1
+sd1 <- initial_guess_sd1
+
+while (abs(desired_overlap_percentage - calculate_overlap_percentage(mean1, sd1)) > tolerance) {
+  if (calculate_overlap_percentage(mean1, sd1) < desired_overlap_percentage) {
+    # If the calculated overlap is less than desired, increase the mean
+    mean1 <- mean1 + 0.01
+  } else {
+    # If the calculated overlap is greater than desired, decrease the standard deviation
+    sd1 <- sd1 - 0.01
+  }
+}
+# Calculate the low and high values for the shaded region based on desired overlap
+overlap_range <- qnorm(c((1 - desired_overlap_percentage) / 2, 1 - (1 - desired_overlap_percentage) / 2), 
+                       mean = mean1, sd = sd1)
+
+# Generate x values for the range of the distributions
+x <- seq(min(overlap_range)-3, max(overlap_range)+3, by = 0.01)
+
+# Compute the density values for the two distributions
+density1 <- dnorm(x, mean = mean1, sd = sd1)
+density2 <- dnorm(x, mean = mean2, sd = sd2)
+
+# Create a data frame for ggplot
+df <- data.frame(x = x, density1 = density1, density2 = density2)
+
+# Create the ggplot object
+ggplot(df, aes(x = x)) +
+  
+  # Add the first density curve
+  geom_line(aes(y = density1), color = "blue", size = 1) +
+  
+  # Add the second density curve
+  geom_line(aes(y = density2), color = "red", size = 1) +
+  
+  # Add shaded region
+  # geom_ribbon(data = subset(df, x >= min(overlap_range) & x <= max(overlap_range)), 
+  #             aes(ymin = 0, ymax = pmin(density1, density2)[x >= min(overlap_range) & x <= max(overlap_range)]), 
+  #             fill = "gray", alpha = 0.5) +
+  
+  # Customize labels and title
+  labs(
+    y = "Density",
+    title = "Large effect size"
+  ) +
+  theme_minimal()
+
+# Define the PDF functions for the two normal distributions
+pdf1 <- function(x) dnorm(x, mean = mean1, sd = sd1)
+pdf2 <- function(x) dnorm(x, mean = mean2, sd = sd2)
+
+
+# Calculate the overlap by integrating the smaller PDF over the overlap range
+overlap <- integrate(function(x) pmin(pdf1(x), pdf2(x)), lower = overlap_range[1]-3, upper = overlap_range[2]+3)
+
+# Print the result
+cat("Overlap between the two PDFs:", overlap$value, "\n")
+```
+
+## Just Like $\alpha$ relates to important p-values, Power relates to important Effects
+
+Power is the probability of rejecting the null hypothesis when it is actually false
+
+## Just Like $\alpha$ relates to important p-values, Power relates to important Effects
+
+Power is the probability of making a correct decision when the null hypothesis is false
+
+## Just Like $\alpha$ relates to important p-values, Power relates to important Effects
+
+Power is the probability that a significance test will pick up on an effect that is present
+
+## Just Like $\alpha$ relates to important p-values, Power relates to important Effects
+
+Power is the probability of avoiding a **Type II Error**
+
+## Easiest Way to Remember Type I vs Type II
+
+![](typ12error.png){width=700px}
+
+## When to use the Z-test
+
+$$z = \frac{x - \mu}{\sigma}$$
+
+1) Our data is a continuous variable 
+
+2) Our data represents a random sample from an identical distribution
+
+3) We gathered our samples independently of one another
+
+4) We know the standard deviation for the population
+
+5) We believe our data is normally distributed (at least at the limit)
+
+In practice the last condition is met when
+$$n \geq 30$$
+
+## Moving From Z to T
+
+When $sigma$ is known
+$$z = \frac{x - \mu}{\sigma} \implies \frac{x - \bar{x}}{\sigma} $$ 
+
+When $sigma$ is unknown
+
+$$t = \frac{x - \mu}{s_{\bar{x}}} \implies \frac{x - \bar{x}}{s_{\bar{x}}} = \frac{x - \bar{x}}{\frac{s}{\sqrt{n}}} $$ 
+
+## Degrees of freedom
+
+In many distributions, including the t-distribution, we accept that we are dealing with uncertainty
+
+We specifically say we are uncertain about our distribution in relation to how many samples we have
+
+Mathematically we call this degrees of freedom (df)
+
+$$df = n-1$$
+
+Why minus 1? Because the mean is estimated, and thus a fixed value
+
+## Visualizing the t-distributions
+
+```{r tdists}
+
+# Generate a sequence of x values
+x <- seq(-4, 4, by = 0.01)
+dfs <- c(1, 3, 10, 30)
+# Create a data frame with x values and PDF values for different degrees of freedom
+df <- data.frame(x = rep(x, times = length(dfs)), 
+                 df = rep(dfs, each = length(x)),
+                 pdf = dt(x, df = rep(dfs, each = length(x))))
+
+# Create the plot
+ggplot(df, aes(x = x, y = pdf, color = as.factor(df))) +
+  geom_line() +
+  geom_line(data = data.frame(x = x, pdf = dnorm(x)), aes(x = x, y = pdf), linetype = "dashed", color = "black") + # Add the standard normal PDF
+  labs(title = "T-Distribution PDF with Different Degrees of Freedom", y = "Probability", x="standard deviation") +
+  scale_color_discrete(name = "Degrees of Freedom") +
+  theme_minimal() 
+```
+
+
+
+## Assumptions for the T-test
+
+
+1) Our data is a continuous variable 
+
+2) Our data represents a random sample from an identical distribution
+
+3) We gathered our samples independently of one another
+
+4) We believe our data is normally distributed (at least at the limit)
+
+<s>5) We know the standard deviation for the population</s>
+
+
+## Types of t-tests
+
+1) Single Sample
+
+2) Independent Samples
+
+3) Paired Samples (AKA: Dependent Samples)
+
+## ANOVA
+
+Analysis of Variance (ANOVA) is a statistical method used to compare means of three or more samples. It is an extension of the t-test for more than two groups.
+
+It is used when we have a continuous Dependent variable and and a categorical Independent Variable
+
+Key points to remember:
+
+ANOVA tests the null hypothesis that all group means are the same.
+
+If significant, we conclude that at least one group mean is different.
+
+Further analysis is required to determine which means are different.
+
+## ANOVA uses the F-distribution
+
+
+$$F= \frac{\text{Variation between sample means}}{\text{Variation within the samples}}$$
+
+
+
+## ANOVA Model
+
+ANOVA decomposes the variance in the data into:
+
+**Between-group variance** - Variability due to interaction between the samples.
+
+""Within-group variance** - Variability due to differences within individual samples.
+
+The F-statistic is the ratio of these variances:
+
+$$ F = \frac{\text{Mean Square Between (MSB)}}{\text{Mean Square Within (MSW)}}$$
+
+## Calculating ANOVA
+
+1) Compute the overall mean (grand mean).
+
+2) Calculate the between-group and within-group sum of squares.
+
+3) Compute Mean Square Between (MSB) and Mean Square Within (MSW).
+
+4) Calculate the F-statistic and compare it to the F-distribution to find the p-value.
+
+## Degrees of Freedom in ANOVA
+
+Degrees of freedom for ANOVA are split into two parts:
+
+1) **Between Groups**: $df_{between} = k-1$ where $k$ is the number of groups.
+
+2) **Within Groups**: $df_{within}=N−k$ where $N$ is the total number of observations.
+
+The total $df$ is $df_{total} =N−1$
+
+## Visualizing ANOVA
+
+```{r anovaex}
+# Simulating data for ANOVA visualization
+group_means <- c(5, 5.5, 6)
+names(group_means) <- c("Group 1", "Group 2", "Group 3")
+data <- data.frame(group = rep(names(group_means), each = 100),
+                   value = unlist(lapply(group_means, function(mu) rnorm(100, mean = mu))))
+
+# ANOVA Plot
+ggplot(data, aes(x = group, y = value, fill = group)) +
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3) +
+  labs(title = "ANOVA Boxplot", y = "Values", x = "Group") +
+  theme_minimal() 
+```
+
+## Assumptions for ANOVA
+
+Just like the t-test, ANOVA comes with assumptions:
+
+The samples are independent.
+
+Each sample is from a normally distributed population.
+
+The population variances of the groups are equal (homoscedasticity).
+
+If these assumptions are violated, alternative methods such as the Kruskal-Wallis test may be more appropriate.
+
+## Post Hoc Tests in ANOVA
+
+If ANOVA indicates significant differences, post hoc tests are used to find out which specific groups differ.
+
+Tukey's Honest Significant Difference (HSD)
+
+Bonferroni Correction
+
+Scheffé's Method
+
+**These control for Type I error across multiple comparisons.**
+
+## 2-Factor ANOVA
+
+Instead of one independent variable, we have 2!
+
+For example, the height of a person may be related to their gender AND if they play basketball
+
+In your groups think of some other scenarios like this where multiple independent variable relate to a dependent variable
+
+## Why not just do 2 separate 1-Factor ANOVAs?
+
+
+## Why not just do 2 separate 1-Factor ANOVAs?
+
+We can study the INTERACTION between factors!
+
+Study systemic variability coming from an additional factor
+
+## The 2-Factor ANOVA tells you about
+
+How Factor A relates to the dependent variable
+
+How Factor B relates to the dependent variable
+
+How Factor A and Factor B interact in relation to the dependent variable
+
+
+## Example Set up
+
+2+ levels of IV1 (e.g. Drug A, B, C)
+
+2+ levels of IV2 (e.g. Low, High Dosage)
+
+1 continuous DV (e.g. anxiety)
+
+What are the hypothesis we are testing?
+
+
+```{r fakedata}
+set.seed(123)
+group1 <- rnorm(10, mean=10, sd=2) 
+group2 <- rnorm(10, mean=12, sd=3)
+group3 <- rnorm(10, mean=14, sd=4)
+dv <- c(group1, group2, group3)
+iv1 <- rep(c("A","B","C"), each=10)
+iv2 <- rep(c("High","Low"), times=15) 
+df <- data.frame(dv=dv, iv1=iv1, iv2=iv2)
+```
+
+## Hypotheses
+
+$$H_0: \mu_{A} = \mu_{B} = \mu_{C}$$
+
+$$H_a: \text{at least one mean differs}$$
+
+$$H_0: \mu_\text{Low} = \mu_\text{High}$$
+$$H_a: \mu_\text{Low} \neq \mu_\text{High}$$
+
+$$H_0: \text{No Interaction}$$
+$$H_a: \text{Significant Interaction}$$
+
+## Analysis
+
+- Two-way ANOVA 
+
+- Follow up tests
+
+  - Main effects: Tukey's HSD
+
+  - Interaction: Simple effects analysis
+  
+  ## Understanding Correlation
+
+Correlation is a statistical concept that helps us understand the relationship between two CONTINUOUS variables.
+
+Correlations Tell Us:
+
+1) Magnitude of the relationship
+
+2) Direction of the relationship
+
+Pearson correlation measures the strength and direction of a linear relationship between two continuous variables.
+
+It ranges from -1 (perfect negative correlation) to 1 (perfect positive correlation), with 0 indicating no linear correlation.
+
+We call correlation r
+
+## Hypotheses
+In correlation, we typically test for the null and alternative hypotheses.
+$$H_0 : \text{No correlation between Variable 1 and Variable 2}$$
+$$H_a : \text{Correlation between Variable 1 and Variable 2}$$
+
+## What do correlations look like?
+
+```{r correlationPerfect}
+
+df <- data_frame(X = rnorm(100, mean = 50)) %>%
+  mutate(Y = X + 10)
+
+plot1<-ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Perfect Correlation")+
+  theme_minimal()
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 1)) %>%
+  mutate(Y = X + 10 + rand)
+
+plot2 <- ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Strong Correlation")+
+  theme_minimal()
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 3)) %>%
+  mutate(Y = X + 10 + rand)
+
+plot3<-ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("Weak Correlation")+
+  theme_minimal()
+
+df <- data_frame(X = rnorm(100, mean = 50),
+                 rand = rnorm(100, mean=5, sd = 5)) %>%
+  mutate(Y = 45 + rand)
+
+plot4<-ggplot(df, aes(x=X, y=Y)) +
+  geom_point() +
+  ggtitle("No Correlation")+
+  theme_minimal()
+
+library(patchwork)
+plot1+plot2+plot3+plot4
+
+```
+
+
+## What factors effect r?
+
+Outliers
+
+Restriction of Range 
+
+Nonlinearity
+
+## Pearson Correlation Assumptions
+
+1) Data is Randomly Selected and Representative 
+
+2) Underlying distributions are approximately normal (and data are continuous)
+
+3) Linear Relationship
+
+4) No outliers
+
+
+## Reliability
+
+Refers to the consistency and stability of measurements over time or across different situations.
+
+In the context of correlations, reliable ensure that the relationship between variables is accurately captured.
+
+Common methods for assessing reliability include: 
+
+- test-retest reliability 
+
+- Split-Half test 
+
+- Cronbach's $\alpha$
+
+## Regression 
+
+```{r Regr}
+
+# Create a single dataframe with different correlation scenarios
+df <- data.frame(
+  X = rnorm(400, mean = 50),
+  Y = NA,
+  Correlation = factor(rep(c("Perfect", "Strong", "Weak", "No"), each = 100))
+)
+
+set.seed(123)  # For reproducibility
+df$Y[df$Correlation == "Perfect"] <- df$X[df$Correlation == "Perfect"] + 10
+df$Y[df$Correlation == "Strong"] <- df$X[df$Correlation == "Strong"] + 10 + rnorm(100, mean = 5, sd = 1)
+df$Y[df$Correlation == "Weak"] <- df$X[df$Correlation == "Weak"] + 10 + rnorm(100, mean = 5, sd = 3)
+df$Y[df$Correlation == "No"] <- 45 + rnorm(100, mean = 5, sd = 5)
+
+## Compute Pearson's R and R-squared for each group
+correlation_data <- df %>%
+  group_by(Correlation) %>%
+  summarise(Pearson_R = cor(X, Y), R_Squared = cor(X, Y)^2)
+
+# Create a single plot using facet_grid with Pearson's R and R-squared annotations and regression lines
+ggplot(df, aes(x = X, y = Y)) +
+  geom_point() +
+  geom_text(data = correlation_data, aes(x = 48, y = 75, label = paste("R =", round(Pearson_R, 2), "\nR^2 =", round(R_Squared, 2))), hjust = 0, vjust = 0) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  ylim(40, 85) +
+  ggtitle("Correlation Scenarios with Regression Line and R-squared") +
+  theme_minimal() +
+  facet_wrap(. ~ Correlation)
+
+```
+
+## Regression Key Ideas
+
+Regression is a statistical technique used to model the relationship between a dependent variable $Y$ and one or more independent variables $X$.
+
+It aims to find the best-fitting line (or curve) that describes this relationship.
+
+## Types of Regression
+
+Linear Regression: Models a linear relationship between variables.
+
+Multiple Regression: Includes more than one independent variable.
+
+Polynomial Regression: Models nonlinear relationships using polynomial functions.
+
+Logistic Regression: Used for binary or categorical outcomes.
+
+## Correlation vs. Regression
+
+Correlation measures the strength and direction of a linear relationship between two variables without making predictions.
+
+Regression not only measures the relationship but **also predicts** values of the dependent variable based on the independent variable(s).
+
+## Pearson's R and Regression
+
+Pearson's correlation coefficient $R$ quantifies the strength and direction of a linear relationship between two variables.
+
+In regression, $R$ still helps us understand how well the model fits the data.
+
+## R-squared (AKA R^2 AKA $R^2$ AKA $R*R$)
+
+R-squared is a measure of how well the regression model explains the variability in the dependent variable.
+
+It quantifies the proportion of variance in Y explained by the independent variable(s).
+
+## R-squared and Pearson's R
+
+$R^2$ and Pearson's R both measure the strength of the relationship between variables.
+
+However, $R^2$ provides a clearer indication of how well the regression model fits the data.
+
+## WHy is $R^2$ Clearer?
+
+- Interpretability - For example, $R^2$ = 0.8 means 80% of the variability in the dependent variable is accounted for by the independent variable(s)
+
+- Model Fit - You can have a relatively high R but it does not tell you anything about your model
+
+- Comparing Models - $R^2$ does not care how many independent variables a model has so you can compare models with different numbers o these
+
+- Prediction Accuracy - Again, $R^2$ is all about how good your model is at explaining variability
+
+
+
+## Interpreting $R^2$
+
+R-squared ranges from 0 to 1, with higher values indicating better fit.
+
+
+An R-squared of 0 means the model explains none of the variance, while 1 means it explains all the variance.
+
+Why can it not be negative?
+
+## Regression Asumptions
+
+Linear Relationship between IV(s) and DV
+
+Normal Distributions
+
+Random Selection
+
+No Multicollinearity
+
+## Multicollinearity
+
+When predictors (IVs) are too highly correlated
+
+This assumption is opnly important in multiple linear regression
+
+For example if you are trying to predict a dogs age and the predictors are hind limb length and height this would probably be a situation with multicollinearity
+
+In your groups think of other such scenarios
+
+## Regression Model
+
+$$Y = mx + b + \epsilon = \beta_0 + \beta_1x + \epsilon = \Sigma_{i=0}^{k} \beta_ix_i+ \epsilon $$
+
+## P- values and Regression
+
+In regression, it helps us assess the significance of our model's coefficients.
+
+## Hypothesis testing 
+
+In simple linear regression, we often want to test if the slope of the regression line is statistically different from zero.
+
+Null hypothesis ($H_0$): The slope ($\beta_1$) equals zero.
+Alternative hypothesis ($H_a$): The slope ($\beta_1$) is not equal to zero.
+
+## Some more Fun with t-tests
+
+The t-statistic measures how many standard errors $\beta_1$ is away from zero.
+
+
+It's calculated as $$t = \frac{\beta_1 - 0}{SE(\beta_1)}$$
+
+where $SE(\beta_1)$ is the standard error of the slope estimate.
+
+
+## Degrees of Freedom
+
+The degrees of freedom for the t-distribution is (n - 2), where n is the number of data points.
+
+We subtract 2 because we have estimated two parameters: the intercept and the slope.
