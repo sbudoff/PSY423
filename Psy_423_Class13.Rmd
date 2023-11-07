@@ -30,6 +30,26 @@ print(code_link)
 ## Regression 
 
 ```{r Regr}
+
+# Create a single dataframe with different correlation scenarios
+df <- data.frame(
+  X = rnorm(400, mean = 50),
+  Y = NA,
+  Correlation = factor(rep(c("Perfect", "Strong", "Weak", "No"), each = 100))
+)
+
+set.seed(123)  # For reproducibility
+df$Y[df$Correlation == "Perfect"] <- df$X[df$Correlation == "Perfect"] + 10
+df$Y[df$Correlation == "Strong"] <- df$X[df$Correlation == "Strong"] + 10 + rnorm(100, mean = 5, sd = 1)
+df$Y[df$Correlation == "Weak"] <- df$X[df$Correlation == "Weak"] + 10 + rnorm(100, mean = 5, sd = 3)
+df$Y[df$Correlation == "No"] <- 45 + rnorm(100, mean = 5, sd = 5)
+
+## Compute Pearson's R and R-squared for each group
+correlation_data <- df %>%
+  group_by(Correlation) %>%
+  summarise(Pearson_R = cor(X, Y), R_Squared = cor(X, Y)^2)
+
+
 # Create a single plot using facet_grid with Pearson's R and R-squared annotations and regression lines
 ggplot(df, aes(x = X, y = Y)) +
   geom_point() +
