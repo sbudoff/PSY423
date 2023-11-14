@@ -1,0 +1,211 @@
+---
+title: "PSY 423 Exam 2"
+author: "S. Budoff"
+date: "2023-11-15"
+output: pdf_document
+---
+
+## Instructions
+
+This is a two part exam. 
+
+Part 1 will test you theoretical knowledge in terms of your ability to correctly identify statistical language we have gone over, and your ability to visualize some of these ideas. Part 1 is closed note-book and should be completed during the class period. For questions that ask you to doodle, I am not looking or accuracy in the sense of a computer rendering, however, if there is a key feature you are trying to convey and are worried I will not see it please write an explanation on the side. Please answer your questions on this paper exam and turn it in when you are ready. Each question is worth 1 points.
+
+Part 2 will be take home and you can use any resources you would like, except for your friends/family/acquaintances/house-mates/co-workers/etc (arch-enemies are ok but I will need concrete proof that you hate each other, with p-values and examples). This portion of the exam will be easiest to complete using JAMOVI, but you are welcome to use another statistical language or chatGPT plus R. If you choose to use a Large Language Model, please take screen shots of your full chat log as I would like to see you "showing your work" with these tools. Each question will be worth 1 point and I will scale the resultant score to be 85 points.
+
+IMPORTANT NOTE ON GRADING, please do not be stressed about your grade, I will offer unpenalized retakes during office hours if you are unhappy with how you do today. Take a deep breath and good luck :)
+\newpage
+
+
+## Question 1:
+
+Which of the following measures of central tendency is by default displayed on a boxplot?
+
+A. Mean
+
+B. Median
+
+C. Mode
+
+D. Variance
+
+E. Confidence Interval
+
+## Question 2:
+
+Which of the following measures of variability accounts for the sample size?
+
+A. $\sigma$
+
+B. $\sigma^2$
+
+C. Variance
+
+D. Standard Error of the Mean
+
+E. Range
+
+## Question 3:
+
+A researcher is studying wealth disparities, by surveying income from many communities across the USA such that she gathered datasets from each community which are notably left skewed. Using the ______ of each data set she can justify using statistical tests which assume normal distributions on the basis of the _______.
+
+A. mean ; central limit theorem
+
+B. mean ; variable limit theorem
+
+C. variance ; central limit theorem
+
+D. variance ; variable limit theorem
+
+E. median ; central limit theorem
+
+## Question 4:
+
+The 95% confidence interval around the mean represents the uncertainty related to the:
+
+A. sample mean
+
+B. population mean
+
+C. sample size
+
+D. specific experimental methods
+
+E. specific experimental sample
+
+## Question 5:
+
+An investigator wants to study how different test prep strategies impact that scores of students taking curricula with language, math, physical education, and art classes. The student's are divided into two groups, one is taught specific test prep strategies for each curricula, the other is taught only one strategy that should be applied to all classes. The investigator then recorded scores on the students' math test, what statistical test should they use?
+
+A. one sample t-test
+
+B. independent samples t-test
+
+C. one sample ANOVA
+
+D. two factor ANOVA
+
+E. Regression
+
+## Question 6:
+
+A study is performed to determine how morning beverage preference impacts the time participants fall asleep, what statistical test is most appropriate?
+
+A. one sample t-test
+
+B. independent samples t-test
+
+C. one sample ANOVA
+
+D. two factor ANOVA
+
+E. Regression
+
+## Question 7:
+
+In a pet shelter, the manager has carefully documented the amount of time it takes for animals to be adopted as well as their estimated age at the time of adoption. If she wants to predict how long it will take for an animal to be adopted when they arrive at the shelter what statistical test should she perform?
+
+A. one sample t-test
+
+B. independent samples t-test
+
+C. one sample ANOVA
+
+D. two factor ANOVA
+
+E. Regression
+
+## Question 8:
+
+In the same pet shelter, the manager has read that in her state cats are most often adopted after 1 month, what statistical test should she perform to see if this is true in her shelter?
+
+A. one sample t-test
+
+B. independent samples t-test
+
+C. one sample ANOVA
+
+D. two factor ANOVA
+
+E. Regression
+
+## Question 9:
+
+In a pet shelter, if the manager wants to know if there is a difference in how long it takes for each species to get adopted, what statistical test should she perform?
+
+A. one sample t-test
+
+B. independent samples t-test
+
+C. one sample ANOVA
+
+D. two factor ANOVA
+
+E. Regression
+
+
+## Question 10:
+
+In this pet shelter, the manager has performed a post-hoc Tukey test and found that canaries are adopted faster than any other type of animal that comes through, and in particular the yellow canaries are adopted faster than other colored canaries, even though yellow cats and dogs are adopted at roughly the same speed as other cats and dogs. Based on this information, what statistical test did she perform?
+
+A. one sample t-test
+
+B. independent samples t-test
+
+C. one sample ANOVA
+
+D. two factor ANOVA
+
+E. Regression
+
+\newpage
+
+You are performing a study in which three participants come in every week to be tested on a number of factors related to their eating habits and the dependent variable you are focusing on as an outcome is their height 
+
+
+## Question 11:
+
+During the first 10 weeks of the study you measure the mean height of the sample population that has enrolled in your study. Please draw what you expect the 95% confidence interval around the predicted population mean for your study group will be as a scatterplot with error bars where week number is on the x axis, and weight is on the y-axis. Assume the true population mean is 160 cm.
+
+\newpage
+
+## Question 12:
+
+After each participant joined the study, and you performed the initial measurement, they were given a stretching regiment to perform for 10 weeks, after which they came back to be re-evaluated. State the null and alternative hypothesis of the specific test you performed. Assuming your calculated p-value is 0.01, and cohen's d is 0.99, state the conclusion of the experiment.
+
+\newpage
+
+## Question 13:
+
+In addition to assigning the participants a stretching routine, on the initial appointment participants were surveyed about their favorite music genre (rock, pop, hip-hop, country), and if they drank coffee that day. A 2-factor Anova was performed focusing on the participant's change in height and it was observed that the interaction between these variables had a p = .049 while the main effects had a p = .32, and p = .051. Please state the conclusion and list the post-hoc tests that should be performed.
+
+
+\newpage
+
+## Question 14:
+
+Another feature you surveyed during the initial screening was the amount of sleep participants normally get (in hours) and the year their date of birth. You created a regression model considering these features and found these predictors respectively had the parameter's 3 and -1. Please doodle two scatter plots, one relating sleep to change in height and the other relating date of birth to change in height. Finally, write out the equation, using the symbol $\beta_0$ to indicate the intercept, $H$ to be the change in height, $S$ to be sleep, and $D$ to be date of birth.
+
+\newpage
+
+## Question 15:
+
+Doodle a cartoon of a type I error and another of a type II error, please include a caption if you feel like the point in your cartoon is not coming across.
+
+
+\newpage
+1) B
+2) D
+3) A
+4) B
+5) B
+6) C
+7) E
+8) A
+9) C
+10) D
+11) DOODLE
+12) DOODLE
+13) DOODLE
+14) DOODLE
+15) DOODLE

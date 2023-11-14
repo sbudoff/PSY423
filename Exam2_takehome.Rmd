@@ -88,12 +88,7 @@ We will be exploring an edited version of the Pokemon Dataset by Rounak Banik, a
 ### Question 1.2: Which variable is most obviously normally distributed?
 
 
-
-### Question 1.3: Which variable is best described as tetramodal?
-
-
-
-## Question 1.3: For the distributions that are not obviously normally distributed and have only one major peak, how would you describe their skew?
+### Question 1.3: For the distributions that are not obviously normally distributed and have only one major peak, how would you describe their skew?
 
 
 
